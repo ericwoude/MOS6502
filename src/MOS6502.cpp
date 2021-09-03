@@ -89,6 +89,80 @@ uint16_t CPU::ReadWord(uint32_t& machineCycles, uint16_t address, Mem& memory)
     return (h << 8) | l;
 }
 
+// Addressing modes
+uint8_t CPU::ImmediateAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    return FetchByte(machineCycles, memory);
+}
+
+uint8_t CPU::ZPAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
+    return ReadByte(machineCycles, zeroPageAddress, memory);
+}
+
+uint8_t CPU::ZPXAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
+
+    // If it exceeds the zero page, wrap around.
+    uint8_t zeroPageAddressXWrap = (zeroPageAddress + X) & 0xFF;
+    machineCycles--;
+
+    return ReadByte(machineCycles, zeroPageAddressXWrap, memory);
+}
+
+uint8_t CPU::ABSAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    uint16_t absAddress = FetchWord(machineCycles, memory);
+    return ReadByte(machineCycles, absAddress, memory);
+}
+
+uint8_t CPU::ABSXAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    uint16_t absAddress = FetchWord(machineCycles, memory);
+    uint16_t sum = absAddress + X;
+
+    // Newly computed address crossed the page boundary.
+    if (sum - absAddress >= 0xFF)
+        machineCycles--;
+
+    return ReadByte(machineCycles, sum, memory);
+}
+
+uint8_t CPU::ABSYAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    uint16_t absAddress = FetchWord(machineCycles, memory);
+    uint16_t sum = absAddress + Y;
+
+    // Newly computed address crossed the page boundary.
+    if (sum - absAddress >= 0xFF)
+        machineCycles--;
+    
+    return ReadByte(machineCycles, sum, memory);
+}
+
+uint8_t CPU::INDXAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    uint16_t address = FetchByte(machineCycles, memory);
+    uint16_t target = ReadWord(machineCycles, address + X, memory);
+    machineCycles--;
+
+    return ReadByte(machineCycles, target, memory);
+}
+
+uint8_t CPU::INDYAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
+    uint16_t effectiveAddress = ReadWord(machineCycles, zeroPageAddress, memory);
+    uint16_t effectiveAddressY = effectiveAddress + Y;
+
+    if (effectiveAddressY - effectiveAddress >= 0xFF)
+            machineCycles--;
+
+    return ReadByte(machineCycles, effectiveAddressY, memory);
+}
+
 void CPU::Execute(uint32_t machineCycles, Mem& memory)
 {
     while (machineCycles > 0)
@@ -102,7 +176,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             ////////////////////////////////////
             case LDA_IM:
             {
-                A = FetchByte(machineCycles, memory);
+                A = ImmediateAddressing(machineCycles, memory);
                 Z = (A == 0);
                 N = (A & 0b1000000) > 0;
             } break;
@@ -112,8 +186,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // the zero page.
             case LDA_ZP:
             {
-                uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
-                A = ReadByte(machineCycles, zeroPageAddress, memory);
+                A = ZPAddressing(machineCycles, memory);
                 Z = (A == 0);
                 N = (A & 0b1000000) > 0;
             } break;
@@ -123,12 +196,9 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // the zero page size (FF), then it will wrap around.
             case LDA_ZPX:
             {
-                uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
-                A = ReadByte(machineCycles, (zeroPageAddress + X) & 0xFF, memory);
-                machineCycles--;
+                A = ZPXAddressing(machineCycles, memory);
                 Z = (A == 0);
                 N = (A & 0b1000000) > 0;
-                std::cout << machineCycles + 0<< std::endl;
             } break;
 
             // Fetches an absolute address (word) from the PC by
@@ -136,34 +206,27 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // absolute address.
             case LDA_ABS:
             {
-                uint16_t absAddress = FetchWord(machineCycles, memory);
-                A = ReadByte(machineCycles, absAddress, memory);
+                A = ABSAddressing(machineCycles, memory);
+                Z = (A == 0);
+                N = (A & 0b1000000) > 0;
             } break;
 
             // Like LDA_ABS, except adds the contents of register X
             // to the absolute address.
             case LDA_ABSX:
             {
-                uint16_t absAddress = FetchWord(machineCycles, memory);
-                uint16_t sum = absAddress + X;
-                A = ReadByte(machineCycles, sum, memory);
-
-                // Newly computed address crossed the page boundary.
-                if (sum - absAddress >= 0xFF)
-                    machineCycles--;
+                A = ABSXAddressing(machineCycles, memory);
+                Z = (A == 0);
+                N = (A & 0b1000000) > 0;        
             } break;
 
             // Like LDA_ABSX, except it uses the Y register instead of
             // the X register.
             case LDA_ABSY:
             {
-                uint16_t absAddress = FetchWord(machineCycles, memory);
-                uint16_t sum = absAddress + Y;
-                A = ReadByte(machineCycles, sum, memory);
-
-                // Newly computed address crossed the page boundary.
-                if (sum - absAddress >= 0xFF)
-                    machineCycles--;
+                A = ABSYAddressing(machineCycles, memory);
+                Z = (A == 0);
+                N = (A & 0b1000000) > 0;    
             } break;
 
             // Fetches an address, adds the contents of X to it, and
@@ -172,11 +235,9 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // effective address.
             case LDA_INDX:
             {
-                uint16_t address = FetchByte(machineCycles, memory);
-                uint16_t target = ReadWord(machineCycles, address + X, memory);
-                machineCycles--;
-
-                A = ReadByte(machineCycles, target, memory);
+                A = INDXAddressing(machineCycles, memory);
+                Z = (A == 0);
+                N = (A & 0b1000000) > 0;
             } break;
 
             // Fetches address from memory. Fetches a new target address
@@ -185,14 +246,9 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // cycle if the memory is read out of page bound.
             case LDA_INDY:
             {
-                uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
-                uint16_t effectiveAddress = ReadWord(machineCycles, zeroPageAddress, memory);
-                uint16_t effectiveAddressY = effectiveAddress + Y;
-
-                A = ReadByte(machineCycles, effectiveAddressY, memory);
-
-                if (effectiveAddressY - effectiveAddress >= 0xFF)
-                    machineCycles--;
+                A = INDYAddressing(machineCycles, memory);
+                Z = (A == 0);
+                N = (A & 0b1000000) > 0;
             } break;
 
             // case INS_JPS_A:

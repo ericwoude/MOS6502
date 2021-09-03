@@ -42,15 +42,6 @@ class CPU
     void Reset(Mem& memory);
     void Execute(uint32_t machineCycles, Mem& memory);
  
-    // Fetch a single byte from memory offsetted by the PC.
-    uint8_t FetchByte(uint32_t& machineCycles, Mem& memory);
-    uint16_t FetchWord(uint32_t& machineCycles, Mem& memory);
-
-    // Like FetchByte, except it fetches using an address and it does not
-    // increment the program counter.
-    uint8_t ReadByte(uint32_t& machineCycles, uint16_t address, Mem& memory);
-    uint16_t ReadWord(uint32_t& machineCycles, uint16_t address, Mem& memory);
- 
     // Opcodes
     static constexpr uint8_t
         LDA_IM = 0xA9,
@@ -62,6 +53,26 @@ class CPU
         LDA_INDX = 0xA1,
         LDA_INDY = 0xB1,
         JPS_A = 0x20;
+
+    private:
+    // Addressing modes
+    uint8_t ImmediateAddressing(uint32_t& machineCycles, Mem& memory);
+    uint8_t ZPAddressing(uint32_t& machineCycles, Mem& memory);
+    uint8_t ZPXAddressing(uint32_t& machineCycles, Mem& memory);
+    uint8_t ABSAddressing(uint32_t& machineCycles, Mem& memory);
+    uint8_t ABSXAddressing(uint32_t& machineCycles, Mem& memory);
+    uint8_t ABSYAddressing(uint32_t& machineCycles, Mem& memory);
+    uint8_t INDXAddressing(uint32_t& machineCycles, Mem& memory);
+    uint8_t INDYAddressing(uint32_t& machineCycles, Mem& memory);
+
+    // Fetch a single byte from memory offsetted by the PC.
+    uint8_t FetchByte(uint32_t& machineCycles, Mem& memory);
+    uint16_t FetchWord(uint32_t& machineCycles, Mem& memory);
+
+    // Like FetchByte, except it fetches using an address and it does not
+    // increment the program counter.
+    uint8_t ReadByte(uint32_t& machineCycles, uint16_t address, Mem& memory);
+    uint16_t ReadWord(uint32_t& machineCycles, uint16_t address, Mem& memory);
 };
 
 #endif // MOS6502_H
