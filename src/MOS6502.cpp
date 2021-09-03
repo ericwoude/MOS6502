@@ -296,6 +296,40 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
                 LDSetFlags(X);
             } break;
 
+            ////////////////////////////////////
+            // LDY
+            ////////////////////////////////////
+
+            case LDY_IM:
+            {
+                Y = ImmediateAddressing(machineCycles, memory);
+                LDSetFlags(Y);
+            } break;
+
+            case LDY_ZP:
+            {
+                Y = ZPAddressing(machineCycles, memory);
+                LDSetFlags(Y);
+            } break;
+
+            case LDY_ZPX:
+            {
+                Y = ZPXAddressing(machineCycles, memory);
+                LDSetFlags(Y);
+            } break;
+
+            case LDY_ABS:
+            {
+                Y = ABSAddressing(machineCycles, memory);
+                LDSetFlags(Y);
+            } break;
+
+            case LDY_ABSX:
+            {
+                Y = ABSXAddressing(machineCycles, memory);
+                LDSetFlags(Y);
+            } break;
+
             // case INS_JPS_A:
             // {
             //     uint16_t address = FetchWord(machineCycles, memory);
