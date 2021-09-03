@@ -59,6 +59,12 @@ class CPU
         LDX_ABS = 0xAE,
         LDX_ABSY = 0xBE,
 
+        LDY_IM = 0xA0,
+        LDY_ZP = 0xA4,
+        LDY_ZPX = 0xB4,
+        LDY_ABS = 0xAC,
+        LDY_ABSX = 0xBC,
+
         JPS_A = 0x20;
 
     private:

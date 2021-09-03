@@ -206,6 +206,22 @@ TEST_F(LoadStoreTests, LDXZeroPageY)
     EXPECT_FALSE(cpu.N);
 }
 
+TEST_F(LoadStoreTests, LDXZeroPageYWrapAround)
+{
+    cpu.Y = 0xFF;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDX_ZPY;
+    mem[0xFFFD] = 0x80;
+    mem[0x007F] = 0x22;
+
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
 TEST_F(LoadStoreTests, LDXAbsolute)
 {
     // INLINE PROGRAM
@@ -234,6 +250,83 @@ TEST_F(LoadStoreTests, LDXAbsoluteY)
     cpu.Execute(4, mem);
 
     EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+// Tests for LDY instructions
+
+TEST_F(LoadStoreTests, LDYImmediate)
+{
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDY_IM;
+    mem[0xFFFD] = 0x22;
+
+    cpu.Execute(2, mem);
+
+    EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadStoreTests, LDYZeroPage)
+{
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDY_ZP;
+    mem[0xFFFD] = 0x15;
+    mem[0x0015] = 0x22;
+
+    cpu.Execute(3, mem);
+
+    EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadStoreTests, LDYZeroPageX)
+{
+    cpu.X = 0xA;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDY_ZPX;
+    mem[0xFFFD] = 0x05;
+    mem[0x000F] = 0x22;
+    
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadStoreTests, LDYAbsolute)
+{
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDY_ABS;
+    mem[0xFFFD] = 0x05;
+    mem[0xFFFE] = 0x05;
+    mem[0x0505] = 0x22;
+    
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadStoreTests, LDYAbsoluteX)
+{
+    cpu.X = 0x02;
+
+    // // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDY_ABSX;
+    mem[0xFFFD] = 0x01;
+    mem[0xFFFE] = 0x01;
+    mem[0x0103] = 0x22;
+    
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.Y, 0x22);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
