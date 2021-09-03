@@ -192,7 +192,7 @@ TEST_F(LoadStoreTests, LDXZeroPage)
 
 TEST_F(LoadStoreTests, LDXZeroPageY)
 {
-    cpu.X = 0xA;
+    cpu.Y = 0xA;
 
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDX_ZPY;
@@ -201,7 +201,7 @@ TEST_F(LoadStoreTests, LDXZeroPageY)
     
     cpu.Execute(4, mem);
 
-    EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_EQ(cpu.X, 0x22);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -225,11 +225,11 @@ TEST_F(LoadStoreTests, LDXAbsoluteY)
 {
     cpu.Y = 0x02;
 
-    // INLINE PROGRAM
-    mem[0xFFFC] = CPU::LDA_ABSY;
-    mem[0xFFFD] = 0x05;
-    mem[0xFFFE] = 0x05;
-    mem[0x0507] = 0x22;
+    // // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDX_ABSY;
+    mem[0xFFFD] = 0x01;
+    mem[0xFFFE] = 0x01;
+    mem[0x0103] = 0x22;
     
     cpu.Execute(4, mem);
 
