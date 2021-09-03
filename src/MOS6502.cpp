@@ -251,6 +251,35 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
                 LDSetFlags();
             } break;
 
+            ////////////////////////////////////
+            // LDX
+            ////////////////////////////////////
+
+            case LDX_IM:
+            {
+
+            } break;
+
+            case LDX_ZP:
+            {
+
+            } break;
+
+            case LDX_ZPY:
+            {
+
+            } break;
+
+            case LDX_ABS:
+            {
+
+            } break;
+
+            case LDX_ABSY:
+            {
+
+            } break;
+
             // case INS_JPS_A:
             // {
             //     uint16_t address = FetchWord(machineCycles, memory);

@@ -160,3 +160,80 @@ TEST_F(LoadStoreTests, LDAIndirectY)
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
+
+// Tests for LDX instructions
+
+TEST_F(LoadStoreTests, LDXImmediate)
+{
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDX_IM;
+    mem[0xFFFD] = 0x22;
+
+    cpu.Execute(2, mem);
+
+    EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadStoreTests, LDXZeroPage)
+{
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDX_ZP;
+    mem[0xFFFD] = 0x15;
+    mem[0x0015] = 0x22;
+
+    cpu.Execute(3, mem);
+
+    EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadStoreTests, LDXZeroPageY)
+{
+    cpu.X = 0xA;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDX_ZPY;
+    mem[0xFFFD] = 0x05;
+    mem[0x000F] = 0x22;
+    
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadStoreTests, LDXAbsolute)
+{
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDX_ABS;
+    mem[0xFFFD] = 0x05;
+    mem[0xFFFE] = 0x05;
+    mem[0x0505] = 0x22;
+    
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadStoreTests, LDXAbsoluteY)
+{
+    cpu.Y = 0x02;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDA_ABSY;
+    mem[0xFFFD] = 0x05;
+    mem[0xFFFE] = 0x05;
+    mem[0x0507] = 0x22;
+    
+    cpu.Execute(4, mem);
+
+    EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}

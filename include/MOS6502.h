@@ -52,6 +52,13 @@ class CPU
         LDA_ABSY = 0xB9,
         LDA_INDX = 0xA1,
         LDA_INDY = 0xB1,
+
+        LDX_IM = 0xA2,
+        LDX_ZP = 0xA6,
+        LDX_ZPY = 0xB6,
+        LDX_ABS = 0xAE,
+        LDX_ABSY = 0xBE,
+
         JPS_A = 0x20;
 
     private:
