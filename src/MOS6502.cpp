@@ -112,6 +112,17 @@ uint8_t CPU::ZPXAddressing(uint32_t& machineCycles, Mem& memory)
     return ReadByte(machineCycles, zeroPageAddressXWrap, memory);
 }
 
+uint8_t CPU::ZPYAddressing(uint32_t& machineCycles, Mem& memory)
+{
+    uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
+
+    // If it exceeds the zero page, wrap around.
+    uint8_t zeroPageAddressYWrap = (zeroPageAddress + Y) & 0xFF;
+    machineCycles--;
+
+    return ReadByte(machineCycles, zeroPageAddressYWrap, memory);
+}
+
 uint8_t CPU::ABSAddressing(uint32_t& machineCycles, Mem& memory)
 {
     uint16_t absAddress = FetchWord(machineCycles, memory);
@@ -164,10 +175,10 @@ uint8_t CPU::INDYAddressing(uint32_t& machineCycles, Mem& memory)
 }
 
 // Instruction specific functions
-void CPU::LDSetFlags()
+void CPU::LDSetFlags(uint8_t reg)
 {
-    Z = (A == 0);
-    N = (A & 0b1000000) > 0;
+    Z = (reg == 0);
+    N = (reg & 0b1000000) > 0;
 }
 
 void CPU::Execute(uint32_t machineCycles, Mem& memory)
@@ -185,7 +196,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_IM:
             {
                 A = ImmediateAddressing(machineCycles, memory);
-                LDSetFlags();
+                LDSetFlags(A);
             } break;
 
             // Fetches zero page address from instruction,
@@ -194,7 +205,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ZP:
             {
                 A = ZPAddressing(machineCycles, memory);
-                LDSetFlags();
+                LDSetFlags(A);
             } break;
 
             // Like LDA_ZP, except it adds the contents of register X
@@ -203,7 +214,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ZPX:
             {
                 A = ZPXAddressing(machineCycles, memory);
-                LDSetFlags();
+                LDSetFlags(A);
             } break;
 
             // Fetches an absolute address (word) from the PC by
@@ -212,7 +223,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ABS:
             {
                 A = ABSAddressing(machineCycles, memory);
-                LDSetFlags();;
+                LDSetFlags(A);
             } break;
 
             // Like LDA_ABS, except adds the contents of register X
@@ -220,7 +231,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ABSX:
             {
                 A = ABSXAddressing(machineCycles, memory);
-                LDSetFlags();      
+                LDSetFlags(A);
             } break;
 
             // Like LDA_ABSX, except it uses the Y register instead of
@@ -228,7 +239,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ABSY:
             {
                 A = ABSYAddressing(machineCycles, memory);
-                LDSetFlags();  
+                LDSetFlags(A);
             } break;
 
             // Fetches an address, adds the contents of X to it, and
@@ -238,7 +249,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_INDX:
             {
                 A = INDXAddressing(machineCycles, memory);
-                LDSetFlags();
+                LDSetFlags(A);
             } break;
 
             // Fetches address from memory. Fetches a new target address
@@ -248,7 +259,41 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_INDY:
             {
                 A = INDYAddressing(machineCycles, memory);
-                LDSetFlags();
+                LDSetFlags(A);
+            } break;
+
+            ////////////////////////////////////
+            // LDX
+            ////////////////////////////////////
+
+            case LDX_IM:
+            {
+                X = ImmediateAddressing(machineCycles, memory);
+                LDSetFlags(X);
+            } break;
+
+            case LDX_ZP:
+            {
+                X = ZPAddressing(machineCycles, memory);
+                LDSetFlags(X);
+            } break;
+
+            case LDX_ZPY:
+            {
+                X = ZPYAddressing(machineCycles, memory);
+                LDSetFlags(X);
+            } break;
+
+            case LDX_ABS:
+            {
+                X = ABSAddressing(machineCycles, memory);
+                LDSetFlags(X);
+            } break;
+
+            case LDX_ABSY:
+            {
+                X = ABSYAddressing(machineCycles, memory);
+                LDSetFlags(X);
             } break;
 
             // case INS_JPS_A:
