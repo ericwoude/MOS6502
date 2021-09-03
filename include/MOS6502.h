@@ -66,14 +66,15 @@ class CPU
     uint8_t ImmediateAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t ZPAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t ZPXAddressing(uint32_t& machineCycles, Mem& memory);
+    uint8_t ZPYAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t ABSAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t ABSXAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t ABSYAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t INDXAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t INDYAddressing(uint32_t& machineCycles, Mem& memory);
 
-    // Instruction specific functions
-    void LDSetFlags(); // Sets the Z, N flag for the LDA, LDX and LDY instructions.
+    // Sets the Z, N flag for the LDA, LDX and LDY instructions.
+    void LDSetFlags(uint8_t reg);
 
     // Fetch a single byte from memory offsetted by the PC.
     uint8_t FetchByte(uint32_t& machineCycles, Mem& memory);
