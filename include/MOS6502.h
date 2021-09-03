@@ -65,6 +65,9 @@ class CPU
     uint8_t INDXAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t INDYAddressing(uint32_t& machineCycles, Mem& memory);
 
+    // Instruction specific functions
+    void LDSetFlags(); // Sets the Z, N flag for the LDA, LDX and LDY instructions.
+
     // Fetch a single byte from memory offsetted by the PC.
     uint8_t FetchByte(uint32_t& machineCycles, Mem& memory);
     uint16_t FetchWord(uint32_t& machineCycles, Mem& memory);

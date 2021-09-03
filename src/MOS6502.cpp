@@ -163,6 +163,13 @@ uint8_t CPU::INDYAddressing(uint32_t& machineCycles, Mem& memory)
     return ReadByte(machineCycles, effectiveAddressY, memory);
 }
 
+// Instruction specific functions
+void CPU::LDSetFlags()
+{
+    Z = (A == 0);
+    N = (A & 0b1000000) > 0;
+}
+
 void CPU::Execute(uint32_t machineCycles, Mem& memory)
 {
     while (machineCycles > 0)
@@ -174,11 +181,11 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             ////////////////////////////////////
             // LDA
             ////////////////////////////////////
+
             case LDA_IM:
             {
                 A = ImmediateAddressing(machineCycles, memory);
-                Z = (A == 0);
-                N = (A & 0b1000000) > 0;
+                LDSetFlags();
             } break;
 
             // Fetches zero page address from instruction,
@@ -187,8 +194,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ZP:
             {
                 A = ZPAddressing(machineCycles, memory);
-                Z = (A == 0);
-                N = (A & 0b1000000) > 0;
+                LDSetFlags();
             } break;
 
             // Like LDA_ZP, except it adds the contents of register X
@@ -197,8 +203,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ZPX:
             {
                 A = ZPXAddressing(machineCycles, memory);
-                Z = (A == 0);
-                N = (A & 0b1000000) > 0;
+                LDSetFlags();
             } break;
 
             // Fetches an absolute address (word) from the PC by
@@ -207,8 +212,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ABS:
             {
                 A = ABSAddressing(machineCycles, memory);
-                Z = (A == 0);
-                N = (A & 0b1000000) > 0;
+                LDSetFlags();;
             } break;
 
             // Like LDA_ABS, except adds the contents of register X
@@ -216,8 +220,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ABSX:
             {
                 A = ABSXAddressing(machineCycles, memory);
-                Z = (A == 0);
-                N = (A & 0b1000000) > 0;        
+                LDSetFlags();      
             } break;
 
             // Like LDA_ABSX, except it uses the Y register instead of
@@ -225,8 +228,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_ABSY:
             {
                 A = ABSYAddressing(machineCycles, memory);
-                Z = (A == 0);
-                N = (A & 0b1000000) > 0;    
+                LDSetFlags();  
             } break;
 
             // Fetches an address, adds the contents of X to it, and
@@ -236,8 +238,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_INDX:
             {
                 A = INDXAddressing(machineCycles, memory);
-                Z = (A == 0);
-                N = (A & 0b1000000) > 0;
+                LDSetFlags();
             } break;
 
             // Fetches address from memory. Fetches a new target address
@@ -247,8 +248,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case LDA_INDY:
             {
                 A = INDYAddressing(machineCycles, memory);
-                Z = (A == 0);
-                N = (A & 0b1000000) > 0;
+                LDSetFlags();
             } break;
 
             // case INS_JPS_A:
