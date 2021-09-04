@@ -12,14 +12,14 @@ void Mem::Initialize()
 // Read a single byte from memory.
 uint8_t Mem::operator[](uint32_t address) const
 {
-    assert (address < maxSize);
+    assert (address <= maxSize);
     return data[address];
 }
 
 // Write a single byte to memory.
 uint8_t& Mem::operator[](uint32_t address)
 {
-    assert (address < maxSize);
+    assert (address <= maxSize);
     return data[address];
 }
 
@@ -81,6 +81,20 @@ uint8_t CPU::ReadByte(uint32_t& machineCycles, uint16_t address, Mem& memory)
     return b;
 }
 
+void CPU::StoreByte(uint32_t& machineCycles, uint16_t address, uint8_t value, Mem& memory)
+{
+    memory[address] = value;
+    machineCycles--;
+}
+
+// void CPU::StoreWord(uint32_t& machineCycles, uint16_t address, uint16_t value, Mem& memory)
+// {
+//     memory[address]     = (uint8_t) value;
+//     memory[address + 1] = (value << 8);
+
+//     machineCycles -= 2;
+// }
+
 uint16_t CPU::ReadWord(uint32_t& machineCycles, uint16_t address, Mem& memory)
 {
     uint8_t l = ReadByte(machineCycles, address, memory);
@@ -97,8 +111,7 @@ uint8_t CPU::ImmediateAddressing(uint32_t& machineCycles, Mem& memory)
 
 uint8_t CPU::ZPAddressing(uint32_t& machineCycles, Mem& memory)
 {
-    uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
-    return ReadByte(machineCycles, zeroPageAddress, memory);
+    return FetchByte(machineCycles, memory);
 }
 
 uint8_t CPU::ZPXAddressing(uint32_t& machineCycles, Mem& memory)
@@ -109,7 +122,7 @@ uint8_t CPU::ZPXAddressing(uint32_t& machineCycles, Mem& memory)
     uint8_t zeroPageAddressXWrap = (zeroPageAddress + X) & 0xFF;
     machineCycles--;
 
-    return ReadByte(machineCycles, zeroPageAddressXWrap, memory);
+    return zeroPageAddressXWrap;
 }
 
 uint8_t CPU::ZPYAddressing(uint32_t& machineCycles, Mem& memory)
@@ -120,16 +133,15 @@ uint8_t CPU::ZPYAddressing(uint32_t& machineCycles, Mem& memory)
     uint8_t zeroPageAddressYWrap = (zeroPageAddress + Y) & 0xFF;
     machineCycles--;
 
-    return ReadByte(machineCycles, zeroPageAddressYWrap, memory);
+    return zeroPageAddressYWrap;
 }
 
-uint8_t CPU::ABSAddressing(uint32_t& machineCycles, Mem& memory)
+uint16_t CPU::ABSAddressing(uint32_t& machineCycles, Mem& memory)
 {
-    uint16_t absAddress = FetchWord(machineCycles, memory);
-    return ReadByte(machineCycles, absAddress, memory);
+    return FetchWord(machineCycles, memory);
 }
 
-uint8_t CPU::ABSXAddressing(uint32_t& machineCycles, Mem& memory)
+uint16_t CPU::ABSXAddressing(uint32_t& machineCycles, Mem& memory)
 {
     uint16_t absAddress = FetchWord(machineCycles, memory);
     uint16_t sum = absAddress + X;
@@ -138,10 +150,19 @@ uint8_t CPU::ABSXAddressing(uint32_t& machineCycles, Mem& memory)
     if (sum - absAddress >= 0xFF)
         machineCycles--;
 
-    return ReadByte(machineCycles, sum, memory);
+    return sum;
 }
 
-uint8_t CPU::ABSYAddressing(uint32_t& machineCycles, Mem& memory)
+uint16_t CPU::ABSXAddressing5(uint32_t& machineCycles, Mem& memory)
+{
+    uint16_t absAddress = FetchWord(machineCycles, memory);
+    uint16_t sum = absAddress + X;
+    machineCycles--;
+
+    return sum;
+}
+
+uint16_t CPU::ABSYAddressing(uint32_t& machineCycles, Mem& memory)
 {
     uint16_t absAddress = FetchWord(machineCycles, memory);
     uint16_t sum = absAddress + Y;
@@ -150,29 +171,49 @@ uint8_t CPU::ABSYAddressing(uint32_t& machineCycles, Mem& memory)
     if (sum - absAddress >= 0xFF)
         machineCycles--;
     
-    return ReadByte(machineCycles, sum, memory);
+    return sum;
 }
 
-uint8_t CPU::INDXAddressing(uint32_t& machineCycles, Mem& memory)
+uint16_t CPU::ABSYAddressing5(uint32_t& machineCycles, Mem& memory)
+{
+    uint16_t absAddress = FetchWord(machineCycles, memory);
+    uint16_t sum = absAddress + Y;
+    machineCycles--;
+
+    return sum;
+}
+
+uint16_t CPU::INDXAddressing(uint32_t& machineCycles, Mem& memory)
 {
     uint16_t address = FetchByte(machineCycles, memory);
     uint16_t target = ReadWord(machineCycles, address + X, memory);
     machineCycles--;
 
-    return ReadByte(machineCycles, target, memory);
+    return target;
 }
 
-uint8_t CPU::INDYAddressing(uint32_t& machineCycles, Mem& memory)
+uint16_t CPU::INDYAddressing(uint32_t& machineCycles, Mem& memory)
 {
     uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
-    uint16_t effectiveAddress = ReadWord(machineCycles, zeroPageAddress, memory);
-    uint16_t effectiveAddressY = effectiveAddress + Y;
+    uint16_t target = ReadWord(machineCycles, zeroPageAddress, memory);
+    uint16_t targetY = target + Y;
 
-    if (effectiveAddressY - effectiveAddress >= 0xFF)
+    if (targetY - target >= 0xFF)
             machineCycles--;
 
-    return ReadByte(machineCycles, effectiveAddressY, memory);
+    return targetY;
 }
+
+uint16_t CPU::INDYAddressing6(uint32_t& machineCycles, Mem& memory)
+{
+    uint8_t zeroPageAddress = FetchByte(machineCycles, memory);
+    uint16_t target = ReadWord(machineCycles, zeroPageAddress, memory);
+    uint16_t targetY = target + Y;
+    machineCycles--;
+
+    return targetY;
+}
+
 
 // Instruction specific functions
 void CPU::LDSetFlags(uint8_t reg)
@@ -204,7 +245,8 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // the zero page.
             case LDA_ZP:
             {
-                A = ZPAddressing(machineCycles, memory);
+                uint8_t zeroPageAddress = ZPAddressing(machineCycles, memory);
+                A = ReadByte(machineCycles, zeroPageAddress, memory);
                 LDSetFlags(A);
             } break;
 
@@ -213,7 +255,8 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // the zero page size (FF), then it will wrap around.
             case LDA_ZPX:
             {
-                A = ZPXAddressing(machineCycles, memory);
+                uint8_t zeroPageAddress = ZPXAddressing(machineCycles, memory);
+                A = ReadByte(machineCycles, zeroPageAddress, memory);
                 LDSetFlags(A);
             } break;
 
@@ -222,7 +265,8 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // absolute address.
             case LDA_ABS:
             {
-                A = ABSAddressing(machineCycles, memory);
+                uint16_t absAddress = ABSAddressing(machineCycles, memory);
+                A = ReadByte(machineCycles, absAddress, memory);
                 LDSetFlags(A);
             } break;
 
@@ -230,7 +274,8 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // to the absolute address.
             case LDA_ABSX:
             {
-                A = ABSXAddressing(machineCycles, memory);
+                uint16_t absAddress = ABSXAddressing(machineCycles, memory);
+                A = ReadByte(machineCycles, absAddress, memory);
                 LDSetFlags(A);
             } break;
 
@@ -238,7 +283,8 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // the X register.
             case LDA_ABSY:
             {
-                A = ABSYAddressing(machineCycles, memory);
+                uint16_t absAddress = ABSYAddressing(machineCycles, memory);
+                A = ReadByte(machineCycles, absAddress, memory);
                 LDSetFlags(A);
             } break;
 
@@ -248,7 +294,8 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // effective address.
             case LDA_INDX:
             {
-                A = INDXAddressing(machineCycles, memory);
+                uint16_t target = INDXAddressing(machineCycles, memory);
+                A = ReadByte(machineCycles, target, memory);
                 LDSetFlags(A);
             } break;
 
@@ -258,7 +305,8 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             // cycle if the memory is read out of page bound.
             case LDA_INDY:
             {
-                A = INDYAddressing(machineCycles, memory);
+                uint16_t target = INDYAddressing(machineCycles, memory);
+                A = ReadByte(machineCycles, target, memory);
                 LDSetFlags(A);
             } break;
 
@@ -274,25 +322,29 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
 
             case LDX_ZP:
             {
-                X = ZPAddressing(machineCycles, memory);
+                uint8_t zeroPageAddress = ZPAddressing(machineCycles, memory);
+                X = ReadByte(machineCycles, zeroPageAddress, memory);
                 LDSetFlags(X);
             } break;
 
             case LDX_ZPY:
             {
-                X = ZPYAddressing(machineCycles, memory);
+                uint8_t zeroPageAddress = ZPYAddressing(machineCycles, memory);
+                X = ReadByte(machineCycles, zeroPageAddress, memory);
                 LDSetFlags(X);
             } break;
 
             case LDX_ABS:
             {
-                X = ABSAddressing(machineCycles, memory);
+                uint16_t absAddress = ABSAddressing(machineCycles, memory);
+                X = ReadByte(machineCycles, absAddress, memory);
                 LDSetFlags(X);
             } break;
 
             case LDX_ABSY:
             {
-                X = ABSYAddressing(machineCycles, memory);
+                uint16_t absAddress = ABSYAddressing(machineCycles, memory);
+                X = ReadByte(machineCycles, absAddress, memory);
                 LDSetFlags(X);
             } break;
 
@@ -308,26 +360,76 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
 
             case LDY_ZP:
             {
-                Y = ZPAddressing(machineCycles, memory);
+                uint8_t zeroPageAddress = ZPAddressing(machineCycles, memory);
+                Y = ReadByte(machineCycles, zeroPageAddress, memory);
                 LDSetFlags(Y);
             } break;
 
             case LDY_ZPX:
             {
-                Y = ZPXAddressing(machineCycles, memory);
+                uint8_t zeroPageAddress = ZPXAddressing(machineCycles, memory);
+                Y = ReadByte(machineCycles, zeroPageAddress, memory);
                 LDSetFlags(Y);
             } break;
 
             case LDY_ABS:
             {
-                Y = ABSAddressing(machineCycles, memory);
+                uint16_t absAddress = ABSAddressing(machineCycles, memory);
+                Y = ReadByte(machineCycles, absAddress, memory);
                 LDSetFlags(Y);
             } break;
 
             case LDY_ABSX:
             {
-                Y = ABSXAddressing(machineCycles, memory);
+                uint16_t absAddress = ABSXAddressing(machineCycles, memory);
+                Y = ReadByte(machineCycles, absAddress, memory);
                 LDSetFlags(Y);
+            } break;
+
+            ////////////////////////////////////
+            // STA
+            ////////////////////////////////////
+
+            case STA_ZP:
+            {
+                uint8_t address = FetchByte(machineCycles, memory);
+                StoreByte(machineCycles, address, A, memory);
+            } break;
+
+            case STA_ZPX:
+            {
+                uint8_t zeroPageAddress = ZPXAddressing(machineCycles, memory);
+                StoreByte(machineCycles, zeroPageAddress, A, memory);
+            } break;
+
+            case STA_ABS:
+            {
+                uint16_t absAddress = ABSAddressing(machineCycles, memory);
+                StoreByte(machineCycles, absAddress, A, memory);
+            } break;
+
+            case STA_ABSX:
+            {
+                uint16_t absAddress = ABSXAddressing5(machineCycles, memory);
+                StoreByte(machineCycles, absAddress, A, memory);
+            }
+
+            case STA_ABSY:
+            {
+                uint16_t absAddress = ABSYAddressing5(machineCycles, memory);
+                StoreByte(machineCycles, absAddress, A, memory);
+            }
+
+            case STA_INDX:
+            {
+                uint16_t target = INDXAddressing(machineCycles, memory);
+                StoreByte(machineCycles, target, A, memory);
+            } break;
+
+            case STA_INDY:
+            {
+                uint16_t target = INDYAddressing6(machineCycles, memory);
+                StoreByte(machineCycles, target, A, memory);
             } break;
 
             // case INS_JPS_A:
@@ -343,6 +445,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             {
                 std::cout << "Unknown instruction: 0x"
                             << std::hex << instruction + 0 << std::endl;
+                return;
             } break;
         }
     }

@@ -2,7 +2,7 @@
 
 #include "MOS6502.h"
 
-class LoadStoreTests : public ::testing::Test
+class LoadTests : public ::testing::Test
 {
     public:
     Mem mem;
@@ -17,7 +17,7 @@ class LoadStoreTests : public ::testing::Test
 
 // Tests for LDA instructions
 
-TEST_F(LoadStoreTests, LDAImmediate)
+TEST_F(LoadTests, LDAImmediate)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDA_IM;
@@ -30,7 +30,7 @@ TEST_F(LoadStoreTests, LDAImmediate)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDAZeroPage)
+TEST_F(LoadTests, LDAZeroPage)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDA_ZP;
@@ -44,7 +44,7 @@ TEST_F(LoadStoreTests, LDAZeroPage)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDAZeroPageX)
+TEST_F(LoadTests, LDAZeroPageX)
 {
     cpu.X = 0xA;
 
@@ -60,7 +60,7 @@ TEST_F(LoadStoreTests, LDAZeroPageX)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDAZeroPageXWrapAround)
+TEST_F(LoadTests, LDAZeroPageXWrapAround)
 {
     cpu.X = 0xFF;
 
@@ -76,7 +76,7 @@ TEST_F(LoadStoreTests, LDAZeroPageXWrapAround)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDAAbsolute)
+TEST_F(LoadTests, LDAAbsolute)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDA_ABS;
@@ -91,7 +91,7 @@ TEST_F(LoadStoreTests, LDAAbsolute)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDAAbsoluteX)
+TEST_F(LoadTests, LDAAbsoluteX)
 {
     cpu.X = 0x02;
 
@@ -108,7 +108,7 @@ TEST_F(LoadStoreTests, LDAAbsoluteX)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDAAbsoluteY)
+TEST_F(LoadTests, LDAAbsoluteY)
 {
     cpu.Y = 0x02;
 
@@ -125,7 +125,7 @@ TEST_F(LoadStoreTests, LDAAbsoluteY)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDAIndirectX)
+TEST_F(LoadTests, LDAIndirectX)
 {
     cpu.X = 0x02;
 
@@ -143,7 +143,7 @@ TEST_F(LoadStoreTests, LDAIndirectX)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDAIndirectY)
+TEST_F(LoadTests, LDAIndirectY)
 {
     cpu.Y = 0x04;
 
@@ -163,7 +163,7 @@ TEST_F(LoadStoreTests, LDAIndirectY)
 
 // Tests for LDX instructions
 
-TEST_F(LoadStoreTests, LDXImmediate)
+TEST_F(LoadTests, LDXImmediate)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDX_IM;
@@ -176,7 +176,7 @@ TEST_F(LoadStoreTests, LDXImmediate)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDXZeroPage)
+TEST_F(LoadTests, LDXZeroPage)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDX_ZP;
@@ -190,7 +190,7 @@ TEST_F(LoadStoreTests, LDXZeroPage)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDXZeroPageY)
+TEST_F(LoadTests, LDXZeroPageY)
 {
     cpu.Y = 0xA;
 
@@ -206,7 +206,7 @@ TEST_F(LoadStoreTests, LDXZeroPageY)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDXZeroPageYWrapAround)
+TEST_F(LoadTests, LDXZeroPageYWrapAround)
 {
     cpu.Y = 0xFF;
 
@@ -222,7 +222,7 @@ TEST_F(LoadStoreTests, LDXZeroPageYWrapAround)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDXAbsolute)
+TEST_F(LoadTests, LDXAbsolute)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDX_ABS;
@@ -237,7 +237,7 @@ TEST_F(LoadStoreTests, LDXAbsolute)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDXAbsoluteY)
+TEST_F(LoadTests, LDXAbsoluteY)
 {
     cpu.Y = 0x02;
 
@@ -256,7 +256,7 @@ TEST_F(LoadStoreTests, LDXAbsoluteY)
 
 // Tests for LDY instructions
 
-TEST_F(LoadStoreTests, LDYImmediate)
+TEST_F(LoadTests, LDYImmediate)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDY_IM;
@@ -269,7 +269,7 @@ TEST_F(LoadStoreTests, LDYImmediate)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDYZeroPage)
+TEST_F(LoadTests, LDYZeroPage)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDY_ZP;
@@ -283,7 +283,7 @@ TEST_F(LoadStoreTests, LDYZeroPage)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDYZeroPageX)
+TEST_F(LoadTests, LDYZeroPageX)
 {
     cpu.X = 0xA;
 
@@ -299,7 +299,7 @@ TEST_F(LoadStoreTests, LDYZeroPageX)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDYAbsolute)
+TEST_F(LoadTests, LDYAbsolute)
 {
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDY_ABS;
@@ -314,7 +314,7 @@ TEST_F(LoadStoreTests, LDYAbsolute)
     EXPECT_FALSE(cpu.N);
 }
 
-TEST_F(LoadStoreTests, LDYAbsoluteX)
+TEST_F(LoadTests, LDYAbsoluteX)
 {
     cpu.X = 0x02;
 

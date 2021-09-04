@@ -30,7 +30,8 @@ enable_testing()
 
 add_executable(
     instruction_tests
-    tests/load_store_tests.cpp
+    tests/load_tests.cpp
+    tests/store_tests.cpp
 )
 
 target_link_libraries(
