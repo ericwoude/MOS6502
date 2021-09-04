@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-
+#include <iostream>
 #include "MOS6502.h"
 
 class LoadTests : public ::testing::Test
@@ -134,6 +134,24 @@ TEST_F(LoadTests, LDAIndirectX)
     mem[0xFFFD] = 0x05;
     mem[0x0007] = 0x0A;
     mem[0x0008] = 0x0A;
+    mem[0x0A0A] = 0x22;
+
+    cpu.Execute(6, mem);
+
+    EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadTests, LDAIndirectXWrapAround)
+{
+    cpu.X = 0xFF;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDA_INDX;
+    mem[0xFFFD] = 0x01;
+    mem[0x0000] = 0x0A; // (0x01 + 0xFF) & 0xFF = 0x00
+    mem[0x0001] = 0x0A;
     mem[0x0A0A] = 0x22;
 
     cpu.Execute(6, mem);

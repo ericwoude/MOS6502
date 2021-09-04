@@ -81,6 +81,11 @@ class CPU
         STY_ZPX = 0x94,
         STY_ABS = 0x8C,
 
+        TAX = 0xAA,
+        TAY = 0xA8,
+        TXA = 0x8A,
+        TYA = 0x98,
+
         JPS_A = 0x20;
 
     private:

@@ -32,6 +32,7 @@ add_executable(
     instruction_tests
     tests/load_tests.cpp
     tests/store_tests.cpp
+    tests/register_transfer_tests.cpp
 )
 
 target_link_libraries(
