@@ -38,7 +38,7 @@ void Mem::WriteWord(uint16_t value, uint32_t address, uint32_t& machineCycles)
 void CPU::Reset(Mem& memory)
 {
     PC = 0xFFFC;
-    SP = 0x0100;
+    SP = 0xFF;
 
     // Clear processor status flags
     C = 0; Z = 0; I = 0; D = 0; B = 0; V = 0; N = 0;
@@ -484,6 +484,49 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case TAY: Y = A; machineCycles--; break;
             case TXA: A = X; machineCycles--; break;
             case TYA: A = Y; machineCycles--; break;
+
+            ////////////////////////////////////
+            // STACK OPERATIONS
+            ////////////////////////////////////
+
+            case TSX:
+            {
+                X = SP;
+                machineCycles--;
+                LDSetFlags(X);
+            } break;
+
+            case TXS:
+            {
+                SP = X;
+                machineCycles--;
+            } break;
+
+            case PHA:
+            {
+                StoreByte(machineCycles, 0x100 + SP--, A, memory);
+            } break;
+
+            case PHP:
+            {
+                StoreByte(machineCycles, 0x100 + SP--, PS, memory);
+            } break;
+
+            case PLA:
+            {
+                SP++;
+                A = ReadByte(machineCycles, 0x100 + SP, memory);
+                machineCycles -= 3; // Why does this consume three cycles (four total)?
+                LDSetFlags(A);
+            } break;
+
+            case PLP:
+            {
+                SP++;
+                PS = ReadByte(machineCycles, 0x100 + SP, memory);
+                machineCycles -= 3; // Why does this consume three cycles (four total)?
+                LDSetFlags(PS);
+            } break;
 
             // case INS_JPS_A:
             // {
