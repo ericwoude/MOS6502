@@ -73,6 +73,14 @@ class CPU
         STA_INDX = 0x81,
         STA_INDY = 0x91,
 
+        STX_ZP = 0x86,
+        STX_ZPY = 0x96,
+        STX_ABS = 0x8E,
+
+        STY_ZP = 0x84,
+        STY_ZPX = 0x94,
+        STY_ABS = 0x8C,
+
         JPS_A = 0x20;
 
     private:
