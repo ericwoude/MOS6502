@@ -164,7 +164,7 @@ TEST_F(StoreTests, STYZeroPage)
 
 TEST_F(StoreTests, STYZeroPageX)
 {
-    TestSTZeroPageXY(CPU::STX_ZPY, cpu.Y, cpu.X);
+    TestSTZeroPageXY(CPU::STY_ZPX, cpu.Y, cpu.X);
 }
 
 TEST_F(StoreTests, STYAbsolute)
