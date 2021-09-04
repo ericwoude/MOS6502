@@ -133,6 +133,9 @@ class CPU
     uint16_t ReadWord(uint32_t& machineCycles, uint16_t address, Mem& memory);
     // void StoreWord(uint32_t& machineCycles, uint16_t address, uint16_t value, Mem& memory);
 
+    // Stack operations
+    void PushToStack(uint32_t& machineCycles, uint8_t value, Mem& memory);
+    uint8_t PullFromStack(uint32_t& machineCycles, Mem& memory);
 };
 
 #endif // MOS6502_H

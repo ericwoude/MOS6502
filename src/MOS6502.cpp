@@ -103,6 +103,19 @@ uint16_t CPU::ReadWord(uint32_t& machineCycles, uint16_t address, Mem& memory)
     return (h << 8) | l;
 }
 
+void CPU::PushToStack(uint32_t& machineCycles, uint8_t value, Mem& memory)
+{
+    StoreByte(machineCycles, 0x100 + SP--, value, memory);
+}
+
+uint8_t CPU::PullFromStack(uint32_t& machineCycles, Mem& memory)
+{
+    SP++;
+    machineCycles -= 3; // Why does this consume three cycles (four total)?
+
+    return ReadByte(machineCycles, 0x100 + SP, memory);
+}
+
 // Addressing modes
 uint8_t CPU::ImmediateAddressing(uint32_t& machineCycles, Mem& memory)
 {
@@ -504,28 +517,23 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
 
             case PHA:
             {
-                StoreByte(machineCycles, 0x100 + SP--, A, memory);
+                PushToStack(machineCycles, A, memory);
             } break;
 
             case PHP:
             {
-                StoreByte(machineCycles, 0x100 + SP--, PS, memory);
+                PushToStack(machineCycles, PS, memory);
             } break;
 
             case PLA:
             {
-                SP++;
-                A = ReadByte(machineCycles, 0x100 + SP, memory);
-                machineCycles -= 3; // Why does this consume three cycles (four total)?
-                LDSetFlags(A);
+                A = PullFromStack(machineCycles, memory);
+                LDSetFlags(PS);
             } break;
 
             case PLP:
             {
-                SP++;
-                PS = ReadByte(machineCycles, 0x100 + SP, memory);
-                machineCycles -= 3; // Why does this consume three cycles (four total)?
-                LDSetFlags(PS);
+                PS = PullFromStack(machineCycles, memory);
             } break;
 
             // case INS_JPS_A:
