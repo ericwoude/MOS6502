@@ -186,7 +186,7 @@ uint16_t CPU::ABSYAddressing5(uint32_t& machineCycles, Mem& memory)
 uint16_t CPU::INDXAddressing(uint32_t& machineCycles, Mem& memory)
 {
     uint16_t address = FetchByte(machineCycles, memory);
-    uint16_t target = ReadWord(machineCycles, address + X, memory);
+    uint16_t target = ReadWord(machineCycles, (address + X) & 0xFF, memory);
     machineCycles--;
 
     return target;
@@ -475,15 +475,6 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
                 uint16_t absAddress = ABSAddressing(machineCycles, memory);
                 StoreByte(machineCycles, absAddress, Y, memory);
             } break;
-
-            ////////////////////////////////////
-            // TAX, TAY, TXA, TYA
-            ////////////////////////////////////
-
-            case TAX: X = A; machineCycles--; break;
-            case TAY: Y = A; machineCycles--; break;
-            case TXA: A = X; machineCycles--; break;
-            case TYA: A = Y; machineCycles--; break;
 
             // case INS_JPS_A:
             // {
