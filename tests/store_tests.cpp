@@ -136,3 +136,38 @@ TEST_F(StoreTests, STAIndirectY) // with wrap
 
     EXPECT_EQ(mem[0x0A0A + cpu.Y], cpu.A);
 }
+
+// Tests for STX instructions
+
+TEST_F(StoreTests, STXZeroPage)
+{
+    TestSTZeroPage(CPU::STX_ZP, cpu.X);
+}
+
+TEST_F(StoreTests, STXZeroPageY)
+{
+    TestSTZeroPageXY(CPU::STX_ZPY, cpu.X, cpu.Y);
+}
+
+TEST_F(StoreTests, STXAbsolute)
+{
+    TestSTAbsolute(CPU::STX_ABS, cpu.X);
+}
+
+
+// Tests for STA instructions
+
+TEST_F(StoreTests, STYZeroPage)
+{
+    TestSTZeroPage(CPU::STY_ZP, cpu.Y);
+}
+
+TEST_F(StoreTests, STYZeroPageX)
+{
+    TestSTZeroPageXY(CPU::STY_ZPX, cpu.Y, cpu.X);
+}
+
+TEST_F(StoreTests, STYAbsolute)
+{
+    TestSTAbsolute(CPU::STY_ABS, cpu.Y);
+}

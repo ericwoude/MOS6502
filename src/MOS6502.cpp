@@ -432,6 +432,50 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
                 StoreByte(machineCycles, target, A, memory);
             } break;
 
+            ////////////////////////////////////
+            // STX
+            ////////////////////////////////////
+
+            case STX_ZP:
+            {
+                uint8_t address = FetchByte(machineCycles, memory);
+                StoreByte(machineCycles, address, X, memory);
+            } break;
+
+            case STX_ZPY:
+            {
+                uint8_t zeroPageAddress = ZPYAddressing(machineCycles, memory);
+                StoreByte(machineCycles, zeroPageAddress, X, memory);
+            } break;
+
+            case STX_ABS:
+            {
+                uint16_t absAddress = ABSAddressing(machineCycles, memory);
+                StoreByte(machineCycles, absAddress, X, memory);
+            } break;
+
+            ////////////////////////////////////
+            // STY
+            ////////////////////////////////////
+
+            case STY_ZP:
+            {
+                uint8_t address = FetchByte(machineCycles, memory);
+                StoreByte(machineCycles, address, Y, memory);
+            } break;
+
+            case STY_ZPX:
+            {
+                uint8_t zeroPageAddress = ZPXAddressing(machineCycles, memory);
+                StoreByte(machineCycles, zeroPageAddress, Y, memory);
+            } break;
+
+            case STY_ABS:
+            {
+                uint16_t absAddress = ABSAddressing(machineCycles, memory);
+                StoreByte(machineCycles, absAddress, Y, memory);
+            } break;
+
             // case INS_JPS_A:
             // {
             //     uint16_t address = FetchWord(machineCycles, memory);
