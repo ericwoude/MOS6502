@@ -476,6 +476,15 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
                 StoreByte(machineCycles, absAddress, Y, memory);
             } break;
 
+            ////////////////////////////////////
+            // TAX, TAY, TXA, TYA
+            ////////////////////////////////////
+
+            case TAX: X = A; machineCycles--; break;
+            case TAY: Y = A; machineCycles--; break;
+            case TXA: A = X; machineCycles--; break;
+            case TYA: A = Y; machineCycles--; break;
+
             // case INS_JPS_A:
             // {
             //     uint16_t address = FetchWord(machineCycles, memory);
