@@ -412,13 +412,13 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             {
                 uint16_t absAddress = ABSXAddressing5(machineCycles, memory);
                 StoreByte(machineCycles, absAddress, A, memory);
-            }
+            } break;
 
             case STA_ABSY:
             {
                 uint16_t absAddress = ABSYAddressing5(machineCycles, memory);
                 StoreByte(machineCycles, absAddress, A, memory);
-            }
+            } break;
 
             case STA_INDX:
             {
