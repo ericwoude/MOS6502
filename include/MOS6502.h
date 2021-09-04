@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include <bitset>
 #include <array>
 #include <map>
 #include <iostream>
@@ -22,22 +23,29 @@ class Mem
     std::array<uint8_t, maxSize> data;
 };
 
+
+
+
 class CPU
 {
     public:
     uint16_t PC;
     uint8_t SP;
- 
     uint8_t A, X, Y;
 
     // Processor status flags
-    uint8_t C : 1;
-    uint8_t Z : 1;
-    uint8_t I : 1;
-    uint8_t D : 1;
-    uint8_t B : 1;
-    uint8_t V : 1;
-    uint8_t N : 1;
+    union
+    {
+        uint8_t PS;
+        uint8_t C : 1;
+        uint8_t Z : 1;
+        uint8_t I : 1;
+        uint8_t D : 1;
+        uint8_t B : 1;
+        uint8_t V : 1;
+        uint8_t N : 1;
+        uint8_t _ : 1; // Unused last bit
+    };
  
     void Reset(Mem& memory);
     void Execute(uint32_t machineCycles, Mem& memory);
@@ -86,6 +94,13 @@ class CPU
         TXA = 0x8A,
         TYA = 0x98,
 
+        TSX = 0xBA,
+        TXS = 0x9A,
+        PHA = 0x48,
+        PHP = 0x08,
+        PLA = 0x68,
+        PLP = 0x28,
+
         JPS_A = 0x20;
 
     private:
@@ -118,6 +133,9 @@ class CPU
     uint16_t ReadWord(uint32_t& machineCycles, uint16_t address, Mem& memory);
     // void StoreWord(uint32_t& machineCycles, uint16_t address, uint16_t value, Mem& memory);
 
+    // Stack operations
+    void PushToStack(uint32_t& machineCycles, uint8_t value, Mem& memory);
+    uint8_t PullFromStack(uint32_t& machineCycles, Mem& memory);
 };
 
 #endif // MOS6502_H
