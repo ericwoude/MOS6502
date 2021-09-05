@@ -12,7 +12,7 @@ class Mem
 {
     public:
     void Initialize();
-    void WriteWord(uint16_t value, uint32_t address, uint32_t& machineCycles);
+    void WriteWord(uint16_t value, uint32_t address, uint32_t& machine_cycles);
  
     // Enables reading and writing to memory using the [] operator.
     uint8_t operator[](uint32_t address) const;
@@ -51,8 +51,8 @@ class CPU
     };
  
     void Reset(Mem& memory);
-    void Execute(uint32_t machineCycles, Mem& memory);
-    void Execute2(uint32_t machineCycles, Mem& memory);
+    void Execute(uint32_t machine_cycles, Mem& memory);
+    void Execute2(uint32_t machine_cycles, Mem& memory);
  
     // Opcodes
     static constexpr uint8_t
@@ -108,57 +108,90 @@ class CPU
         JPS_A = 0x20;
 
     private:
-    using AddressExecution = uint16_t (CPU::*)();
+    using AddressExecution = uint16_t (CPU::*)(uint32_t&, Mem&);
     using OperationExecution = void (CPU::*)(uint32_t&, uint16_t, Mem&);
 
     struct Instruction {
-        AddressExecution addressing;
-        OperationExecution operation;
+        AddressExecution addr;
+        OperationExecution op;
     };
 
     std::array<Instruction, 256> dispatch_table;
-    void exec_instruction(Instruction instruction, uint32_t machineCycles, Mem& memory);
+    void exec_instruction(Instruction instruction, uint32_t machine_cycles, Mem& memory);
+
+    // Addressing mode functions
+    uint16_t AddrImplied(uint32_t&, Mem&); // Does not do anything
+    uint16_t AddrImplicit(uint32_t&, Mem&); // Does not do anything
+    uint16_t AddrImmediate(uint32_t&, Mem&);
+    uint16_t AddrZeroPage(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrZeroPageX(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrZeroPageY(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrAbsolute(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrAbsoluteX(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrAbsoluteX5(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory);
 
     // Addressing modes
-    uint8_t ImmediateAddressing(uint32_t& machineCycles, Mem& memory);
-    uint8_t ZPAddressing(uint32_t& machineCycles, Mem& memory);
-    uint8_t ZPXAddressing(uint32_t& machineCycles, Mem& memory);
-    uint8_t ZPYAddressing(uint32_t& machineCycles, Mem& memory);
-    uint16_t ABSAddressing(uint32_t& machineCycles, Mem& memory);
-    uint16_t ABSXAddressing(uint32_t& machineCycles, Mem& memory);
-    uint16_t ABSXAddressing5(uint32_t& machineCycles, Mem& memory);
-    uint16_t ABSYAddressing(uint32_t& machineCycles, Mem& memory);
-    uint16_t ABSYAddressing5(uint32_t& machineCycles, Mem& memory);
-    uint16_t INDXAddressing(uint32_t& machineCycles, Mem& memory);
-    uint16_t INDYAddressing(uint32_t& machineCycles, Mem& memory);
-    uint16_t INDYAddressing6(uint32_t& machineCycles, Mem& memory);
+    uint8_t ImmediateAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint8_t ZPAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint8_t ZPXAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint8_t ZPYAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint16_t ABSAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint16_t ABSXAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint16_t ABSXAddressing5(uint32_t& machine_cycles, Mem& memory);
+    uint16_t ABSYAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint16_t ABSYAddressing5(uint32_t& machine_cycles, Mem& memory);
+    uint16_t INDXAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint16_t INDYAddressing(uint32_t& machine_cycles, Mem& memory);
+    uint16_t INDYAddressing6(uint32_t& machine_cycles, Mem& memory);
 
     // Sets the Z, N flag for the LDA, LDX and LDY instructions.
     void LDSetFlags(uint8_t reg);
 
     // Fetch a single byte from memory offsetted by the PC.
-    uint8_t FetchByte(uint32_t& machineCycles, Mem& memory);
-    uint16_t FetchWord(uint32_t& machineCycles, Mem& memory);
+    uint8_t FetchByte(uint32_t& machine_cycles, Mem& memory);
+    uint16_t FetchWord(uint32_t& machine_cycles, Mem& memory);
 
     // Like FetchByte, except it fetches using an address and it does not
     // increment the program counter.
-    uint8_t ReadByte(uint32_t& machineCycles, uint16_t address, Mem& memory);
-    void StoreByte(uint32_t& machineCycles, uint16_t address, uint8_t value, Mem& memory);
+    uint8_t ReadByte(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void StoreByte(uint32_t& machine_cycles, uint16_t address, uint8_t value, Mem& memory);
 
-    uint16_t ReadWord(uint32_t& machineCycles, uint16_t address, Mem& memory);
-    // void StoreWord(uint32_t& machineCycles, uint16_t address, uint16_t value, Mem& memory);
+    uint16_t ReadWord(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    // void StoreWord(uint32_t& machine_cycles, uint16_t address, uint16_t value, Mem& memory);
 
     // Stack operations
-    void PushToStack(uint32_t& machineCycles, uint8_t value, Mem& memory);
-    uint8_t PullFromStack(uint32_t& machineCycles, Mem& memory);
+    void PushToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory);
+    uint8_t PullFromStack(uint32_t& machine_cycles, Mem& memory);
 
     // Operation functions
-    void OpLDA(uint32_t& machineCycles, uint16_t address, Mem& memory);
-    void OpIllegal(uint32_t&, uint16_t, Mem&);
+    // LOAD & STORE
+    void OpLDA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpLDX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpLDY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpSTA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpSTX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpSTY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    
+    // REGISTER TRANSFERS
+    void OpTAX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpTAY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpTXA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpTYA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
-    // Addressing functions
-    uint16_t AddrImplied();
-    uint16_t AddrImmediate();
+    // STACK OPERATIONS
+    void OpTSX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpTXS(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpPHA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpPHP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+    void OpIllegal(uint32_t&, uint16_t, Mem&);
 };
 
 #endif // MOS6502_H
