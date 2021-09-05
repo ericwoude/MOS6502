@@ -44,10 +44,6 @@ class StackOperationTests : public ::testing::Test
         // the register and if the stack pointer is incremented.
         EXPECT_EQ(reg, 0x22);
         EXPECT_EQ(cpu.SP, 0xFF);
-
-        // The N, Z flags are set accordingly.
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 };
 
@@ -90,9 +86,24 @@ TEST_F(StackOperationTests, PHP)
 TEST_F(StackOperationTests, PLA)
 {
     TestPullFromStack(CPU::PLA, cpu.A);
+
+    // The N, Z flags are set accordingly.
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
 }
 
 TEST_F(StackOperationTests, PLP)
 {
+    cpu.PS = 0b11111111;
+
     TestPullFromStack(CPU::PLP, cpu.PS);
+
+    // Test all flags are set accordingly.
+    EXPECT_TRUE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_TRUE(cpu.I);
+    EXPECT_TRUE(cpu.D);
+    EXPECT_TRUE(cpu.B);
+    EXPECT_TRUE(cpu.V);
+    EXPECT_TRUE(cpu.N);
 }

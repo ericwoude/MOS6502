@@ -37,14 +37,17 @@ class CPU
     union
     {
         uint8_t PS;
-        uint8_t C : 1;
-        uint8_t Z : 1;
-        uint8_t I : 1;
-        uint8_t D : 1;
-        uint8_t B : 1;
-        uint8_t V : 1;
-        uint8_t N : 1;
-        uint8_t _ : 1; // Unused last bit
+        struct
+        {
+            uint8_t C : 1;
+            uint8_t Z : 1;
+            uint8_t I : 1;
+            uint8_t D : 1;
+            uint8_t B : 1;
+            uint8_t V : 1;
+            uint8_t N : 1;
+            uint8_t _ : 1; // Unused last bit
+        };
     };
  
     void Reset(Mem& memory);
