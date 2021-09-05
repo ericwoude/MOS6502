@@ -35,8 +35,32 @@ void Mem::WriteWord(uint16_t value, uint32_t address, uint32_t& machineCycles)
  * CPU
  **************/
 
+#define DEFINE_OPCODE(HEX, NAME, ADDRESSING_MODE)         \
+    instruction.addressing = &CPU::Addr##ADDRESSING_MODE; \
+    instruction.operation = &CPU::Op##NAME;               \
+    dispatch_table[HEX] = instruction
+
 void CPU::Reset(Mem& memory)
 {
+    // Populate dispatch table
+    Instruction instruction;
+
+    // Prefill dispatch table with illegal opcode handlers
+    instruction.addressing = &CPU::AddrImplied;
+    instruction.operation = &CPU::OpIllegal;
+    dispatch_table.fill(instruction);
+
+    // Actual data for dispatch table
+    DEFINE_OPCODE(0xA9, LDA, Immediate);
+    // LDA_IM = 0xA9,
+    // LDA_ZP = 0xA5,
+    // LDA_ZPX = 0xB5,
+    // LDA_ABS = 0x6D,
+    // LDA_ABSX = 0xBD,
+    // LDA_ABSY = 0xB9,
+    // LDA_INDX = 0xA1,
+    // LDA_INDY = 0xB1,
+
     PC = 0xFFFC;
     SP = 0xFF;
 
@@ -235,7 +259,25 @@ void CPU::LDSetFlags(uint8_t reg)
     N = (reg & 0b1000000) > 0;
 }
 
+void CPU::exec_instruction(Instruction instruction, uint32_t machineCycles, Mem& memory)
+{
+    uint16_t address = (this->*instruction.addressing)();
+    (this->*instruction.operation)(machineCycles, address, memory);
+}
+
+// dispatch table
 void CPU::Execute(uint32_t machineCycles, Mem& memory)
+{
+    while (machineCycles > 0)
+    {
+        uint8_t opcode = FetchByte(machineCycles, memory);
+        Instruction instruction = dispatch_table[opcode];
+        exec_instruction(instruction, machineCycles, memory);
+    }
+}
+
+// switch-based
+void CPU::Execute2(uint32_t machineCycles, Mem& memory)
 {
     while (machineCycles > 0)
     {
@@ -553,4 +595,28 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             } break;
         }
     }
+}
+
+// Addressing mode functions
+uint16_t CPU::AddrImplied()
+{
+    return 0;
+}
+
+uint16_t CPU::AddrImmediate()
+{
+    return PC++;
+}
+
+
+// Instruction functions
+void CPU::OpLDA(uint32_t& machineCycles, uint16_t address, Mem& memory)
+{
+    A = ReadByte(machineCycles, address, memory);
+    LDSetFlags(A);
+}
+
+void CPU::OpIllegal(uint32_t&, uint16_t, Mem&)
+{
+    std::cout << "Unknown instruction: 0x" << std::endl;
 }

@@ -52,6 +52,7 @@ class CPU
  
     void Reset(Mem& memory);
     void Execute(uint32_t machineCycles, Mem& memory);
+    void Execute2(uint32_t machineCycles, Mem& memory);
  
     // Opcodes
     static constexpr uint8_t
@@ -107,6 +108,17 @@ class CPU
         JPS_A = 0x20;
 
     private:
+    using AddressExecution = uint16_t (CPU::*)();
+    using OperationExecution = void (CPU::*)(uint32_t&, uint16_t, Mem&);
+
+    struct Instruction {
+        AddressExecution addressing;
+        OperationExecution operation;
+    };
+
+    std::array<Instruction, 256> dispatch_table;
+    void exec_instruction(Instruction instruction, uint32_t machineCycles, Mem& memory);
+
     // Addressing modes
     uint8_t ImmediateAddressing(uint32_t& machineCycles, Mem& memory);
     uint8_t ZPAddressing(uint32_t& machineCycles, Mem& memory);
@@ -139,6 +151,14 @@ class CPU
     // Stack operations
     void PushToStack(uint32_t& machineCycles, uint8_t value, Mem& memory);
     uint8_t PullFromStack(uint32_t& machineCycles, Mem& memory);
+
+    // Operation functions
+    void OpLDA(uint32_t& machineCycles, uint16_t address, Mem& memory);
+    void OpIllegal(uint32_t&, uint16_t, Mem&);
+
+    // Addressing functions
+    uint16_t AddrImplied();
+    uint16_t AddrImmediate();
 };
 
 #endif // MOS6502_H
