@@ -528,7 +528,7 @@ void CPU::Execute(uint32_t machineCycles, Mem& memory)
             case PLA:
             {
                 A = PullFromStack(machineCycles, memory);
-                LDSetFlags(PS);
+                LDSetFlags(A);
             } break;
 
             case PLP:
