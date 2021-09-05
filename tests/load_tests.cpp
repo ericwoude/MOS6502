@@ -23,9 +23,11 @@ TEST_F(LoadTests, LDAImmediate)
     mem[0xFFFC] = CPU::LDA_IM;
     mem[0xFFFD] = 0x22;
 
-    cpu.Execute(2, mem);
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -37,9 +39,11 @@ TEST_F(LoadTests, LDAZeroPage)
     mem[0xFFFD] = 0x15;
     mem[0x0015] = 0x22;
 
-    cpu.Execute(3, mem);
+    const uint32_t cycles = 3;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -53,9 +57,11 @@ TEST_F(LoadTests, LDAZeroPageX)
     mem[0xFFFD] = 0x05;
     mem[0x000F] = 0x22;
     
-    cpu.Execute(4, mem);
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -69,9 +75,11 @@ TEST_F(LoadTests, LDAZeroPageXWrapAround)
     mem[0xFFFD] = 0x80;
     mem[0x007F] = 0x22;
 
-    cpu.Execute(4, mem);
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -84,9 +92,11 @@ TEST_F(LoadTests, LDAAbsolute)
     mem[0xFFFE] = 0x05;
     mem[0x0505] = 0x22;
     
-    cpu.Execute(4, mem);
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -100,10 +110,12 @@ TEST_F(LoadTests, LDAAbsoluteX)
     mem[0xFFFD] = 0x05;
     mem[0xFFFE] = 0x05;
     mem[0x0507] = 0x22;
-    
-    cpu.Execute(4, mem);
+
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -117,10 +129,12 @@ TEST_F(LoadTests, LDAAbsoluteY)
     mem[0xFFFD] = 0x05;
     mem[0xFFFE] = 0x05;
     mem[0x0507] = 0x22;
-    
-    cpu.Execute(4, mem);
+
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -136,10 +150,12 @@ TEST_F(LoadTests, LDAIndirectX)
     mem[0x0008] = 0x0A;
     mem[0x0A0A] = 0x22;
 
-    cpu.Execute(6, mem);
+    const uint32_t cycles = 6;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
     EXPECT_FALSE(cpu.Z);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.N);
 }
 
@@ -154,9 +170,11 @@ TEST_F(LoadTests, LDAIndirectXWrapAround)
     mem[0x0001] = 0x0A;
     mem[0x0A0A] = 0x22;
 
-    cpu.Execute(6, mem);
+    const uint32_t cycles = 6;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -172,9 +190,11 @@ TEST_F(LoadTests, LDAIndirectY)
     mem[0x0003] = 0x80;
     mem[0x8004] = 0x22;
 
-    cpu.Execute(5, mem);
+    const uint32_t cycles = 6;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -187,9 +207,11 @@ TEST_F(LoadTests, LDXImmediate)
     mem[0xFFFC] = CPU::LDX_IM;
     mem[0xFFFD] = 0x22;
 
-    cpu.Execute(2, mem);
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -201,9 +223,11 @@ TEST_F(LoadTests, LDXZeroPage)
     mem[0xFFFD] = 0x15;
     mem[0x0015] = 0x22;
 
-    cpu.Execute(3, mem);
+    const uint32_t cycles = 3;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -217,9 +241,11 @@ TEST_F(LoadTests, LDXZeroPageY)
     mem[0xFFFD] = 0x05;
     mem[0x000F] = 0x22;
     
-    cpu.Execute(4, mem);
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -233,9 +259,11 @@ TEST_F(LoadTests, LDXZeroPageYWrapAround)
     mem[0xFFFD] = 0x80;
     mem[0x007F] = 0x22;
 
-    cpu.Execute(4, mem);
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -248,9 +276,11 @@ TEST_F(LoadTests, LDXAbsolute)
     mem[0xFFFE] = 0x05;
     mem[0x0505] = 0x22;
     
-    cpu.Execute(4, mem);
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -264,10 +294,12 @@ TEST_F(LoadTests, LDXAbsoluteY)
     mem[0xFFFD] = 0x01;
     mem[0xFFFE] = 0x01;
     mem[0x0103] = 0x22;
-    
-    cpu.Execute(4, mem);
+
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.X, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -280,9 +312,11 @@ TEST_F(LoadTests, LDYImmediate)
     mem[0xFFFC] = CPU::LDY_IM;
     mem[0xFFFD] = 0x22;
 
-    cpu.Execute(2, mem);
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -294,9 +328,11 @@ TEST_F(LoadTests, LDYZeroPage)
     mem[0xFFFD] = 0x15;
     mem[0x0015] = 0x22;
 
-    cpu.Execute(3, mem);
+    const uint32_t cycles = 3;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -310,9 +346,11 @@ TEST_F(LoadTests, LDYZeroPageX)
     mem[0xFFFD] = 0x05;
     mem[0x000F] = 0x22;
     
-    cpu.Execute(4, mem);
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -324,10 +362,12 @@ TEST_F(LoadTests, LDYAbsolute)
     mem[0xFFFD] = 0x05;
     mem[0xFFFE] = 0x05;
     mem[0x0505] = 0x22;
-    
-    cpu.Execute(4, mem);
+
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
@@ -342,9 +382,11 @@ TEST_F(LoadTests, LDYAbsoluteX)
     mem[0xFFFE] = 0x01;
     mem[0x0103] = 0x22;
     
-    cpu.Execute(4, mem);
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.Y, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
     EXPECT_FALSE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }

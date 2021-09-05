@@ -51,8 +51,7 @@ class CPU
     };
  
     void Reset(Mem& memory);
-    void Execute(uint32_t machine_cycles, Mem& memory);
-    void Execute2(uint32_t machine_cycles, Mem& memory);
+    uint32_t Execute(uint32_t machine_cycles, Mem& memory);
  
     // Opcodes
     static constexpr uint8_t
@@ -134,20 +133,6 @@ class CPU
     uint16_t AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory);
-
-    // Addressing modes
-    uint8_t ImmediateAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint8_t ZPAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint8_t ZPXAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint8_t ZPYAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint16_t ABSAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint16_t ABSXAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint16_t ABSXAddressing5(uint32_t& machine_cycles, Mem& memory);
-    uint16_t ABSYAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint16_t ABSYAddressing5(uint32_t& machine_cycles, Mem& memory);
-    uint16_t INDXAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint16_t INDYAddressing(uint32_t& machine_cycles, Mem& memory);
-    uint16_t INDYAddressing6(uint32_t& machine_cycles, Mem& memory);
 
     // Sets the Z, N flag for the LDA, LDX and LDY instructions.
     void LDSetFlags(uint8_t reg);
