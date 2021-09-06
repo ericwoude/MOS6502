@@ -9,7 +9,7 @@ project(
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(SOURCE_FILES src/MOS6502.cpp)
+set(SOURCE_FILES src/cpu.cpp src/mem.cpp)
 
 include_directories(include)
 
