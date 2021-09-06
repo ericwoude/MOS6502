@@ -103,6 +103,7 @@ class CPU
     void exec_instruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory);
 
     // Addressing mode functions
+    uint16_t AddrOpcode(uint32_t&, Mem& memory); // Used for debugging illegal opcodes
     uint16_t AddrImplied(uint32_t&, Mem&); // Does not do anything
     uint16_t AddrImmediate(uint32_t&, Mem&);
     uint16_t AddrZeroPage(uint32_t& machine_cycles, Mem& memory);

@@ -1,5 +1,8 @@
 #include "cpu.h"
 
+#include <iomanip>
+#include <sstream>
+
 #define ADD_DISPATCH(HEX, NAME, ADDRESSING_MODE)         \
     instruction.addr = &CPU::Addr##ADDRESSING_MODE; \
     instruction.op = &CPU::Op##NAME;               \
@@ -9,7 +12,7 @@ CPU::CPU()
 {
     // Prefill dispatch table with illegal opcode handlers
     Instruction instruction;
-    instruction.addr = &CPU::AddrImplied;
+    instruction.addr = &CPU::AddrOpcode;
     instruction.op = &CPU::OpIllegal;
     dispatch_table.fill(instruction);
 
@@ -169,6 +172,11 @@ uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
 }
 
 // Addressing mode functions
+uint16_t CPU::AddrOpcode(uint32_t&, Mem& memory)
+{
+    return memory[PC - 1];
+}
+
 uint16_t CPU::AddrImplied(uint32_t&, Mem&)
 {
     return 0;
@@ -382,6 +390,7 @@ void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    throw std::invalid_argument("Encountered unknown instruction: 0x"
-                                + std::to_string(address));
+    std::stringstream stream;
+    stream << "Unhandled instruction: 0x" << std::hex << address;
+    throw std::invalid_argument(stream.str());
 }
