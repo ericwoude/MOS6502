@@ -36,13 +36,13 @@ class StackOperationTests : public ::testing::Test
 
         // INLINE PROGRAM
         mem[0xFFFC] = opcode;
-        mem[0x01FF] = 0x22;
+        mem[0x01FF] = 0b11111111;
 
         cpu.Execute(4, mem);
 
         // Check if the value is pulled from stack into
         // the register and if the stack pointer is incremented.
-        EXPECT_EQ(reg, 0x22);
+        EXPECT_EQ(reg, 0b11111111);
         EXPECT_EQ(cpu.SP, 0xFF);
     }
 };
@@ -88,14 +88,13 @@ TEST_F(StackOperationTests, PLA)
     TestPullFromStack(CPU::PLA, cpu.A);
 
     // The N, Z flags are set accordingly.
-    EXPECT_FALSE(cpu.Z);
-    EXPECT_FALSE(cpu.N);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_TRUE(cpu.N);
 }
 
 TEST_F(StackOperationTests, PLP)
 {
-    cpu.PS = 0b11111111;
-
+    // Will pull 0b11111111 from stack into PS
     TestPullFromStack(CPU::PLP, cpu.PS);
 
     // Test all flags are set accordingly.

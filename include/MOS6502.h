@@ -44,9 +44,9 @@ class CPU
             uint8_t I : 1;
             uint8_t D : 1;
             uint8_t B : 1;
+            uint8_t _ : 1; // Unused last bit
             uint8_t V : 1;
             uint8_t N : 1;
-            uint8_t _ : 1; // Unused last bit
         };
     };
  
@@ -116,11 +116,10 @@ class CPU
     };
 
     std::array<Instruction, 256> dispatch_table;
-    void exec_instruction(Instruction instruction, uint32_t machine_cycles, Mem& memory);
+    void exec_instruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory);
 
     // Addressing mode functions
     uint16_t AddrImplied(uint32_t&, Mem&); // Does not do anything
-    uint16_t AddrImplicit(uint32_t&, Mem&); // Does not do anything
     uint16_t AddrImmediate(uint32_t&, Mem&);
     uint16_t AddrZeroPage(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrZeroPageX(uint32_t& machine_cycles, Mem& memory);

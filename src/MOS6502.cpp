@@ -46,7 +46,7 @@ void CPU::Reset(Mem& memory)
     Instruction instruction;
 
     // Prefill dispatch table with illegal opcode handlers
-    instruction.addr = &CPU::AddrImplicit;
+    instruction.addr = &CPU::AddrImplied;
     instruction.op = &CPU::OpIllegal;
     dispatch_table.fill(instruction);
 
@@ -189,13 +189,12 @@ void CPU::LDSetFlags(uint8_t reg)
     N = (reg & 0b1000000) > 0;
 }
 
-void CPU::exec_instruction(Instruction instruction, uint32_t machine_cycles, Mem& memory)
+void CPU::exec_instruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
 {
     uint16_t address = (this->*instruction.addr)(machine_cycles, memory);
     (this->*instruction.op)(machine_cycles, address, memory);
 }
 
-// dispatch table
 uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
 {
     const uint32_t machine_cycles_requested = machine_cycles;
@@ -205,16 +204,13 @@ uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
         Instruction ins = dispatch_table[instruction];
         exec_instruction(ins, machine_cycles, memory);
     }
-   	return machine_cycles_requested - machine_cycles;
+
+    const uint32_t machine_cycles_used = machine_cycles_requested - machine_cycles;
+	return machine_cycles_used;
 }
 
 // Addressing mode functions
 uint16_t CPU::AddrImplied(uint32_t&, Mem&)
-{
-    return 0;
-}
-
-uint16_t CPU::AddrImplicit(uint32_t&, Mem&)
 {
     return 0;
 }
@@ -261,8 +257,8 @@ uint16_t CPU::AddrAbsoluteX(uint32_t& machine_cycles, Mem& memory)
     uint16_t absAddress = FetchWord(machine_cycles, memory);
     uint16_t sum = absAddress + X;
 
-    // Newly computed address crossed the page boundary.
-    if (sum - absAddress >= 0xFF)
+    // If the zero page is crossed
+    if ((absAddress ^ sum) >> 8)
         machine_cycles--;
 
     return sum;
@@ -282,8 +278,8 @@ uint16_t CPU::AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory)
     uint16_t absAddress = FetchWord(machine_cycles, memory);
     uint16_t sum = absAddress + Y;
 
-    // Newly computed address crossed the page boundary.
-    if (sum - absAddress >= 0xFF)
+    // If the zero page is crossed
+    if ((absAddress ^ sum) >> 8)
         machine_cycles--;
     
     return sum;
@@ -313,8 +309,9 @@ uint16_t CPU::AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory)
     uint16_t target = ReadWord(machine_cycles, zeroPageAddress, memory);
     uint16_t targetY = target + Y;
 
-    if (targetY - target >= 0xFF)
-            machine_cycles--;
+    // If the zero page is crossed
+    if ((target ^ targetY) >> 8)
+        machine_cycles--;
 
     return targetY;
 }
@@ -428,4 +425,5 @@ void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 void CPU::OpIllegal(uint32_t&, uint16_t, Mem&)
 {
     std::cout << "Unknown instruction: 0x" << std::endl;
+    exit(0);
 }

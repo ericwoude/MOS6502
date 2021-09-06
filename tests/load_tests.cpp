@@ -190,6 +190,26 @@ TEST_F(LoadTests, LDAIndirectY)
     mem[0x0003] = 0x80;
     mem[0x8004] = 0x22;
 
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0x22);
+    EXPECT_EQ(cycles, used_cycles);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LoadTests, LDAIndirectYPageCrossed)
+{
+    cpu.Y = 0xFF;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = CPU::LDA_INDY;
+    mem[0xFFFD] = 0x02;
+    mem[0x0002] = 0x01;
+    mem[0x0003] = 0x0A;
+    mem[0x0B00] = 0x22; // 0x0A01 + 0xFF = 0x0B00
+
     const uint32_t cycles = 6;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 

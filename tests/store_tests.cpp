@@ -23,9 +23,11 @@ class StoreTests : public ::testing::Test
         mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x22;
 
-        cpu.Execute(3, mem);
+        const uint32_t cycles = 3;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
 
         EXPECT_EQ(mem[0x0022], reg);
+        EXPECT_EQ(cycles, used_cycles);
     }
 
     // Tests for STAZeroPageX, STXZeroPageY, STYZeropageX.
@@ -41,9 +43,11 @@ class StoreTests : public ::testing::Test
         mem[0xFFFD] = 0x20;
         mem[0x002 + variant] = 0x00;
 
-        cpu.Execute(4, mem);
+        const uint32_t cycles = 4;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
 
         EXPECT_EQ(mem[0x0020 + variant], reg);
+        EXPECT_EQ(cycles, used_cycles);
     }
 
     // Tests for STAAbsolute, STXAbsolute, and STYAbsolute.
@@ -56,9 +60,11 @@ class StoreTests : public ::testing::Test
         mem[0xFFFD] = 0x02;
         mem[0xFFFE] = 0x02;
 
-        cpu.Execute(4, mem);
+        const uint32_t cycles = 4;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
 
         EXPECT_EQ(mem[0x0202], reg);
+        EXPECT_EQ(cycles, used_cycles);
     }
 
     // Tests for STAAbsoluteX and STAAbsoluteY.
@@ -72,9 +78,11 @@ class StoreTests : public ::testing::Test
         mem[0xFFFD] = 0x02;
         mem[0xFFFE] = 0x02;
 
-        cpu.Execute(5, mem);
+        const uint32_t cycles = 5;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
 
         EXPECT_EQ(mem[0x0202 + reg], cpu.A);
+        EXPECT_EQ(cycles, used_cycles);
     }
 };
 
@@ -116,9 +124,11 @@ TEST_F(StoreTests, STAIndirectX) // with wrap
     mem[0x0007] = 0x0A;
     mem[0x0008] = 0x0A;
 
-    cpu.Execute(6, mem);
+    const uint32_t cycles = 6;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(mem[0x0A0A], cpu.A);
+    EXPECT_EQ(cycles, used_cycles);
 }
 
 TEST_F(StoreTests, STAIndirectY) // with wrap
@@ -132,9 +142,11 @@ TEST_F(StoreTests, STAIndirectY) // with wrap
     mem[0x0005] = 0x0A;
     mem[0x0006] = 0x0A;
 
-    cpu.Execute(6, mem);
+    const uint32_t cycles = 6;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(mem[0x0A0A + cpu.Y], cpu.A);
+    EXPECT_EQ(cycles, used_cycles);
 }
 
 // Tests for STX instructions
