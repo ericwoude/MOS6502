@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "MOS6502.h"
+#include "cpu.h"
 
 class RegisterTransferTests : public ::testing::Test
 {
@@ -21,9 +21,11 @@ class RegisterTransferTests : public ::testing::Test
         // INLINE PROGRAM
         mem[0xFFFC] = opcode;
         
-        cpu.Execute(2, mem);
+        const uint32_t cycles = 2;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
 
         EXPECT_EQ(from, to);
+        EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
     }

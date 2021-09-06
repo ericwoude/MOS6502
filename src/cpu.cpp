@@ -1,39 +1,4 @@
-#include "MOS6502.h"
-
-/**************
- * MEM
- **************/
-
-void Mem::Initialize()
-{
-    data.fill(0);
-}
-
-// Read a single byte from memory.
-uint8_t Mem::operator[](uint32_t address) const
-{
-    assert (address <= maxSize);
-    return data[address];
-}
-
-// Write a single byte to memory.
-uint8_t& Mem::operator[](uint32_t address)
-{
-    assert (address <= maxSize);
-    return data[address];
-}
-
-void Mem::WriteWord(uint16_t value, uint32_t address, uint32_t& machine_cycles)
-{
-    data[address] = value & 0xFF;
-    data[address + 1] = value >> 8;
-
-    machine_cycles -= 2;
-}
-
-/**************
- * CPU
- **************/
+#include "cpu.h"
 
 #define DEFINE_OPCODE(HEX, NAME, ADDRESSING_MODE)         \
     instruction.addr = &CPU::Addr##ADDRESSING_MODE; \
@@ -76,10 +41,10 @@ void CPU::Reset(Mem& memory)
     DEFINE_OPCODE(0x85, STA, ZeroPage);
     DEFINE_OPCODE(0x95, STA, ZeroPageX);
     DEFINE_OPCODE(0x8D, STA, Absolute);
-    DEFINE_OPCODE(0x9D, STA, AbsoluteX);
-    DEFINE_OPCODE(0x99, STA, AbsoluteY);
+    DEFINE_OPCODE(0x9D, STA, AbsoluteX5);
+    DEFINE_OPCODE(0x99, STA, AbsoluteY5);
     DEFINE_OPCODE(0x81, STA, IndexedIndirect);
-    DEFINE_OPCODE(0x91, STA, IndirectIndexed);
+    DEFINE_OPCODE(0x91, STA, IndirectIndexed6);
 
     DEFINE_OPCODE(0x86, STX, ZeroPage);
     DEFINE_OPCODE(0x96, STX, ZeroPageY);
@@ -172,12 +137,13 @@ uint16_t CPU::ReadWord(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 void CPU::PushToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory)
 {
     StoreByte(machine_cycles, 0x100 + SP--, value, memory);
+    machine_cycles--;
 }
 
 uint8_t CPU::PullFromStack(uint32_t& machine_cycles, Mem& memory)
 {
     SP++;
-    machine_cycles -= 3; // Why does this consume three cycles (four total)?
+    machine_cycles -= 2; // Why does this consume three cycles (four total)?
 
     return ReadByte(machine_cycles, 0x100 + SP, memory);
 }
@@ -421,9 +387,8 @@ void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     PS = PullFromStack(machine_cycles, memory);
 }
 
-
-void CPU::OpIllegal(uint32_t&, uint16_t, Mem&)
+void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    std::cout << "Unknown instruction: 0x" << std::endl;
-    exit(0);
+    throw std::invalid_argument("Encountered unknown instruction: 0x"
+                                + std::to_string(address));
 }

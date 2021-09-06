@@ -1,30 +1,14 @@
 #ifndef MOS6502_H
 #define MOS6502_H
 
-#include <stdint.h>
-#include <assert.h>
+#include "mem.h"
+
+#include <cstdint>
+#include <cassert>
 #include <bitset>
 #include <array>
 #include <map>
 #include <iostream>
-
-class Mem
-{
-    public:
-    void Initialize();
-    void WriteWord(uint16_t value, uint32_t address, uint32_t& machine_cycles);
- 
-    // Enables reading and writing to memory using the [] operator.
-    uint8_t operator[](uint32_t address) const;
-    uint8_t& operator[](uint32_t address);
-
-    private:
-    static const size_t maxSize = 64 * 1024;
-    std::array<uint8_t, maxSize> data;
-};
-
-
-
 
 class CPU
 {
@@ -175,7 +159,7 @@ class CPU
     void OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
-    void OpIllegal(uint32_t&, uint16_t, Mem&);
+    void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
 
 #endif // MOS6502_H

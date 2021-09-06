@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "MOS6502.h"
+#include "cpu.h"
 
 class StoreTests : public ::testing::Test
 {
