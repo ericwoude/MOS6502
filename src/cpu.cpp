@@ -68,6 +68,17 @@ CPU::CPU()
     ADD_DISPATCH(0x08, PHP, Implied);
     ADD_DISPATCH(0x68, PLA, Implied);
     ADD_DISPATCH(0x28, PLP, Implied);
+
+    // LOGICAL OPERATIONS
+    ADD_DISPATCH(0x29, AND, Immediate);
+    ADD_DISPATCH(0x25, AND, ZeroPage);
+    ADD_DISPATCH(0x35, AND, ZeroPageX);
+    ADD_DISPATCH(0x2D, AND, Absolute);
+    ADD_DISPATCH(0x3D, AND, AbsoluteX);
+    ADD_DISPATCH(0x39, AND, AbsoluteY);
+    ADD_DISPATCH(0x21, AND, IndexedIndirect);
+    ADD_DISPATCH(0x31, AND, IndirectIndexed);
+
 }
 
 void CPU::Reset(Mem& memory)
@@ -386,6 +397,12 @@ void CPU::OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     PS = PullFromStack(machine_cycles, memory);
+}
+
+void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    A &= ReadByte(machine_cycles, address, memory);
+    LDSetFlags(A);
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)

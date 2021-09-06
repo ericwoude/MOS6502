@@ -160,6 +160,9 @@ class CPU
     void OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
+    // LOGICAL OPERATIONS
+    void OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
 
