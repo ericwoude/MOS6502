@@ -79,6 +79,23 @@ CPU::CPU()
     ADD_DISPATCH(0x21, AND, IndexedIndirect);
     ADD_DISPATCH(0x31, AND, IndirectIndexed);
 
+    ADD_DISPATCH(0x49, EOR, Immediate);
+    ADD_DISPATCH(0x45, EOR, ZeroPage);
+    ADD_DISPATCH(0x55, EOR, ZeroPageX);
+    ADD_DISPATCH(0x4D, EOR, Absolute);
+    ADD_DISPATCH(0x5D, EOR, AbsoluteX);
+    ADD_DISPATCH(0x59, EOR, AbsoluteY);
+    ADD_DISPATCH(0x41, EOR, IndexedIndirect);
+    ADD_DISPATCH(0x51, EOR, IndirectIndexed);
+
+    ADD_DISPATCH(0x09, ORA, Immediate);
+    ADD_DISPATCH(0x05, ORA, ZeroPage);
+    ADD_DISPATCH(0x15, ORA, ZeroPageX);
+    ADD_DISPATCH(0x0D, ORA, Absolute);
+    ADD_DISPATCH(0x1D, ORA, AbsoluteX);
+    ADD_DISPATCH(0x19, ORA, AbsoluteY);
+    ADD_DISPATCH(0x01, ORA, IndexedIndirect);
+    ADD_DISPATCH(0x11, ORA, IndirectIndexed);
 }
 
 void CPU::Reset(Mem& memory)
@@ -404,6 +421,19 @@ void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     A &= ReadByte(machine_cycles, address, memory);
     LDSetFlags(A);
 }
+
+void CPU::OpEOR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    A ^= ReadByte(machine_cycles, address, memory);
+    LDSetFlags(A);
+}
+
+void CPU::OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    A |= ReadByte(machine_cycles, address, memory);
+    LDSetFlags(A);
+}
+
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {

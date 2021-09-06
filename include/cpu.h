@@ -162,6 +162,8 @@ class CPU
 
     // LOGICAL OPERATIONS
     void OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpEOR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
