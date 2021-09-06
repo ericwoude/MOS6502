@@ -1,78 +1,79 @@
 #include "cpu.h"
 
-#define DEFINE_OPCODE(HEX, NAME, ADDRESSING_MODE)         \
+#define ADD_DISPATCH(HEX, NAME, ADDRESSING_MODE)         \
     instruction.addr = &CPU::Addr##ADDRESSING_MODE; \
     instruction.op = &CPU::Op##NAME;               \
     dispatch_table[HEX] = instruction
 
-void CPU::Reset(Mem& memory)
+CPU::CPU()
 {
-    // Populate dispatch table
-    Instruction instruction;
-
     // Prefill dispatch table with illegal opcode handlers
+    Instruction instruction;
     instruction.addr = &CPU::AddrImplied;
     instruction.op = &CPU::OpIllegal;
     dispatch_table.fill(instruction);
 
     // Actual data for dispatch 
     // LOAD & STORE
-    DEFINE_OPCODE(0xA9, LDA, Immediate);
-    DEFINE_OPCODE(0xA5, LDA, ZeroPage);
-    DEFINE_OPCODE(0xB5, LDA, ZeroPageX);
-    DEFINE_OPCODE(0x6D, LDA, Absolute);
-    DEFINE_OPCODE(0xBD, LDA, AbsoluteX);
-    DEFINE_OPCODE(0xB9, LDA, AbsoluteY);
-    DEFINE_OPCODE(0xA1, LDA, IndexedIndirect);
-    DEFINE_OPCODE(0xB1, LDA, IndirectIndexed);
+    ADD_DISPATCH(0xA9, LDA, Immediate);
+    ADD_DISPATCH(0xA5, LDA, ZeroPage);
+    ADD_DISPATCH(0xB5, LDA, ZeroPageX);
+    ADD_DISPATCH(0x6D, LDA, Absolute);
+    ADD_DISPATCH(0xBD, LDA, AbsoluteX);
+    ADD_DISPATCH(0xB9, LDA, AbsoluteY);
+    ADD_DISPATCH(0xA1, LDA, IndexedIndirect);
+    ADD_DISPATCH(0xB1, LDA, IndirectIndexed);
 
-    DEFINE_OPCODE(0xA2, LDX, Immediate);
-    DEFINE_OPCODE(0xA6, LDX, ZeroPage);
-    DEFINE_OPCODE(0xB6, LDX, ZeroPageY);
-    DEFINE_OPCODE(0xAE, LDX, Absolute);
-    DEFINE_OPCODE(0xBE, LDX, AbsoluteY);
+    ADD_DISPATCH(0xA2, LDX, Immediate);
+    ADD_DISPATCH(0xA6, LDX, ZeroPage);
+    ADD_DISPATCH(0xB6, LDX, ZeroPageY);
+    ADD_DISPATCH(0xAE, LDX, Absolute);
+    ADD_DISPATCH(0xBE, LDX, AbsoluteY);
 
-    DEFINE_OPCODE(0xA0, LDY, Immediate);
-    DEFINE_OPCODE(0xA4, LDY, ZeroPage);
-    DEFINE_OPCODE(0xB4, LDY, ZeroPageX);
-    DEFINE_OPCODE(0xAC, LDY, Absolute);
-    DEFINE_OPCODE(0xBC, LDY, AbsoluteX);
+    ADD_DISPATCH(0xA0, LDY, Immediate);
+    ADD_DISPATCH(0xA4, LDY, ZeroPage);
+    ADD_DISPATCH(0xB4, LDY, ZeroPageX);
+    ADD_DISPATCH(0xAC, LDY, Absolute);
+    ADD_DISPATCH(0xBC, LDY, AbsoluteX);
 
-    DEFINE_OPCODE(0x85, STA, ZeroPage);
-    DEFINE_OPCODE(0x95, STA, ZeroPageX);
-    DEFINE_OPCODE(0x8D, STA, Absolute);
-    DEFINE_OPCODE(0x9D, STA, AbsoluteX5);
-    DEFINE_OPCODE(0x99, STA, AbsoluteY5);
-    DEFINE_OPCODE(0x81, STA, IndexedIndirect);
-    DEFINE_OPCODE(0x91, STA, IndirectIndexed6);
+    ADD_DISPATCH(0x85, STA, ZeroPage);
+    ADD_DISPATCH(0x95, STA, ZeroPageX);
+    ADD_DISPATCH(0x8D, STA, Absolute);
+    ADD_DISPATCH(0x9D, STA, AbsoluteX5);
+    ADD_DISPATCH(0x99, STA, AbsoluteY5);
+    ADD_DISPATCH(0x81, STA, IndexedIndirect);
+    ADD_DISPATCH(0x91, STA, IndirectIndexed6);
 
-    DEFINE_OPCODE(0x86, STX, ZeroPage);
-    DEFINE_OPCODE(0x96, STX, ZeroPageY);
-    DEFINE_OPCODE(0x8e, STX, Absolute);
+    ADD_DISPATCH(0x86, STX, ZeroPage);
+    ADD_DISPATCH(0x96, STX, ZeroPageY);
+    ADD_DISPATCH(0x8e, STX, Absolute);
 
-    DEFINE_OPCODE(0x84, STY, ZeroPage);
-    DEFINE_OPCODE(0x94, STY, ZeroPageX);
-    DEFINE_OPCODE(0x8C, STY, Absolute);
+    ADD_DISPATCH(0x84, STY, ZeroPage);
+    ADD_DISPATCH(0x94, STY, ZeroPageX);
+    ADD_DISPATCH(0x8C, STY, Absolute);
 
     // REGISTER TRANSFERS
-    DEFINE_OPCODE(0xAA, TAX, Implied);
-    DEFINE_OPCODE(0xA8, TAY, Implied);
-    DEFINE_OPCODE(0x8A, TXA, Implied);
-    DEFINE_OPCODE(0x98, TYA, Implied);
+    ADD_DISPATCH(0xAA, TAX, Implied);
+    ADD_DISPATCH(0xA8, TAY, Implied);
+    ADD_DISPATCH(0x8A, TXA, Implied);
+    ADD_DISPATCH(0x98, TYA, Implied);
 
     // STACK OPERATIONS 
-    DEFINE_OPCODE(0xBA, TSX, Implied);
-    DEFINE_OPCODE(0x9A, TXS, Implied);
-    DEFINE_OPCODE(0x48, PHA, Implied);
-    DEFINE_OPCODE(0x08, PHP, Implied);
-    DEFINE_OPCODE(0x68, PLA, Implied);
-    DEFINE_OPCODE(0x28, PLP, Implied);
+    ADD_DISPATCH(0xBA, TSX, Implied);
+    ADD_DISPATCH(0x9A, TXS, Implied);
+    ADD_DISPATCH(0x48, PHA, Implied);
+    ADD_DISPATCH(0x08, PHP, Implied);
+    ADD_DISPATCH(0x68, PLA, Implied);
+    ADD_DISPATCH(0x28, PLP, Implied);
+}
 
+void CPU::Reset(Mem& memory)
+{
     PC = 0xFFFC;
     SP = 0xFF;
 
     // Clear processor status flags
-    C = 0; Z = 0; I = 0; D = 0; B = 0; V = 0; N = 0;
+    PS = 0b00000000;
 
     // Reset general-purpose registers
     A = 0; X = 0; Y = 0;
@@ -117,14 +118,6 @@ void CPU::StoreByte(uint32_t& machine_cycles, uint16_t address, uint8_t value, M
     memory[address] = value;
     machine_cycles--;
 }
-
-// void CPU::StoreWord(uint32_t& machine_cycles, uint16_t address, uint16_t value, Mem& memory)
-// {
-//     memory[address]     = (uint8_t) value;
-//     memory[address + 1] = (value << 8);
-
-//     machine_cycles -= 2;
-// }
 
 uint16_t CPU::ReadWord(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
@@ -193,24 +186,24 @@ uint16_t CPU::AddrZeroPage(uint32_t& machine_cycles, Mem& memory)
 
 uint16_t CPU::AddrZeroPageX(uint32_t& machine_cycles, Mem& memory)
 {
-    uint8_t zeroPageAddress = FetchByte(machine_cycles, memory);
+    uint8_t zeropage_address = FetchByte(machine_cycles, memory);
 
     // If it exceeds the zero page, wrap around.
-    uint8_t zeroPageAddressXWrap = (zeroPageAddress + X) & 0xFF;
+    uint8_t zeropage_addressX = (zeropage_address + X) & 0xFF;
     machine_cycles--;
 
-    return zeroPageAddressXWrap;
+    return zeropage_addressX;
 }
 
 uint16_t CPU::AddrZeroPageY(uint32_t& machine_cycles, Mem& memory)
 {
-    uint8_t zeroPageAddress = FetchByte(machine_cycles, memory);
+    uint8_t zeropage_address = FetchByte(machine_cycles, memory);
 
     // If it exceeds the zero page, wrap around.
-    uint8_t zeroPageAddressYWrap = (zeroPageAddress + Y) & 0xFF;
+    uint8_t zeropage_addressY = (zeropage_address + Y) & 0xFF;
     machine_cycles--;
 
-    return zeroPageAddressYWrap;
+    return zeropage_addressY;
 }
 
 uint16_t CPU::AddrAbsolute(uint32_t& machine_cycles, Mem& memory)
@@ -220,11 +213,11 @@ uint16_t CPU::AddrAbsolute(uint32_t& machine_cycles, Mem& memory)
 
 uint16_t CPU::AddrAbsoluteX(uint32_t& machine_cycles, Mem& memory)
 {
-    uint16_t absAddress = FetchWord(machine_cycles, memory);
-    uint16_t sum = absAddress + X;
+    uint16_t abs_address = FetchWord(machine_cycles, memory);
+    uint16_t sum = abs_address + X;
 
     // If the zero page is crossed
-    if ((absAddress ^ sum) >> 8)
+    if ((abs_address ^ sum) >> 8)
         machine_cycles--;
 
     return sum;
@@ -232,8 +225,8 @@ uint16_t CPU::AddrAbsoluteX(uint32_t& machine_cycles, Mem& memory)
 
 uint16_t CPU::AddrAbsoluteX5(uint32_t& machine_cycles, Mem& memory)
 {
-    uint16_t absAddress = FetchWord(machine_cycles, memory);
-    uint16_t sum = absAddress + X;
+    uint16_t abs_address = FetchWord(machine_cycles, memory);
+    uint16_t sum = abs_address + X;
     machine_cycles--;
 
     return sum;
@@ -241,11 +234,11 @@ uint16_t CPU::AddrAbsoluteX5(uint32_t& machine_cycles, Mem& memory)
 
 uint16_t CPU::AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory)
 {
-    uint16_t absAddress = FetchWord(machine_cycles, memory);
-    uint16_t sum = absAddress + Y;
+    uint16_t abs_address = FetchWord(machine_cycles, memory);
+    uint16_t sum = abs_address + Y;
 
     // If the zero page is crossed
-    if ((absAddress ^ sum) >> 8)
+    if ((abs_address ^ sum) >> 8)
         machine_cycles--;
     
     return sum;
@@ -253,8 +246,8 @@ uint16_t CPU::AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory)
 
 uint16_t CPU::AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory)
 {
-    uint16_t absAddress = FetchWord(machine_cycles, memory);
-    uint16_t sum = absAddress + Y;
+    uint16_t abs_address = FetchWord(machine_cycles, memory);
+    uint16_t sum = abs_address + Y;
     machine_cycles--;
 
     return sum;
@@ -271,8 +264,8 @@ uint16_t CPU::AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory)
 
 uint16_t CPU::AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory)
 {
-    uint8_t zeroPageAddress = FetchByte(machine_cycles, memory);
-    uint16_t target = ReadWord(machine_cycles, zeroPageAddress, memory);
+    uint8_t zeropage_address = FetchByte(machine_cycles, memory);
+    uint16_t target = ReadWord(machine_cycles, zeropage_address, memory);
     uint16_t targetY = target + Y;
 
     // If the zero page is crossed
@@ -284,8 +277,8 @@ uint16_t CPU::AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory)
 
 uint16_t CPU::AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory)
 {
-    uint8_t zeroPageAddress = FetchByte(machine_cycles, memory);
-    uint16_t target = ReadWord(machine_cycles, zeroPageAddress, memory);
+    uint8_t zeropage_address = FetchByte(machine_cycles, memory);
+    uint16_t target = ReadWord(machine_cycles, zeropage_address, memory);
     uint16_t targetY = target + Y;
     machine_cycles--;
 

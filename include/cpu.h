@@ -1,18 +1,21 @@
-#ifndef MOS6502_H
-#define MOS6502_H
+#ifndef CPU_H
+#define CPU_H
 
 #include "mem.h"
 
+#include <array>
 #include <cstdint>
 #include <cassert>
-#include <bitset>
-#include <array>
-#include <map>
 #include <iostream>
 
 class CPU
 {
     public:
+    CPU();
+    void Reset(Mem& memory);
+    uint32_t Execute(uint32_t machine_cycles, Mem& memory);
+
+    // Program counter, stack pointer and general-purpose registers A, X and Y.
     uint16_t PC;
     uint8_t SP;
     uint8_t A, X, Y;
@@ -33,9 +36,6 @@ class CPU
             uint8_t N : 1;
         };
     };
- 
-    void Reset(Mem& memory);
-    uint32_t Execute(uint32_t machine_cycles, Mem& memory);
  
     // Opcodes
     static constexpr uint8_t
@@ -162,4 +162,4 @@ class CPU
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
 
-#endif // MOS6502_H
+#endif // CPU_H
