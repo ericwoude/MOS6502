@@ -21,15 +21,14 @@ class LogicalTests : public ::testing::Test
         cpu.A = 0b10101010;
 
         mem[0xFFFC] = opcode;
-        mem[0xFFFD] = 0b00001000;
+		mem[0xFFFD] = 0b00001000;
 
         const uint32_t cycles = 2;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
-        EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
+		EXPECT_EQ( cpu.A, f(0b10101010, 0b00001000) );
+		EXPECT_EQ( used_cycles, cycles );
+		EXPECT_FALSE( cpu.Z );
     }
 
     void OpZeroPage(uint8_t opcode, const std::function<int( int, int )>& f)
@@ -37,12 +36,13 @@ class LogicalTests : public ::testing::Test
         cpu.A = 0b10101010;
 
         mem[0xFFFC] = opcode;
-        mem[0xFFFD] = 0b00001000;
+        mem[0xFFFD] = 0x22;
+        mem[0x0022] = 0b00001000;
 
-        const uint32_t cycles = 2;
+        const uint32_t cycles = 3;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -53,14 +53,14 @@ class LogicalTests : public ::testing::Test
         cpu.X = 0x04;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = 0x35; // AND ZeroPageX opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x05;
         mem[0x0009] = 0b00001000;
 
         const uint32_t cycles = 4;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -71,7 +71,7 @@ class LogicalTests : public ::testing::Test
         cpu.X = 0x04;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND Absolute opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x05;
         mem[0xFFFE] = 0x05;
         mem[0x0505] = 0b00001000;
@@ -79,7 +79,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 4;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -90,7 +90,7 @@ class LogicalTests : public ::testing::Test
         cpu.X = 0x04;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND AbsoluteX opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x05;
         mem[0xFFFE] = 0x05;
         mem[0x0509] = 0b00001000;
@@ -98,7 +98,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 4;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -109,7 +109,7 @@ class LogicalTests : public ::testing::Test
         cpu.X = 0xFF;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND AbsoluteX opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x01;
         mem[0xFFFE] = 0x05;
         mem[0x0600] = 0b00001000; // Crossed page boundary
@@ -117,7 +117,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 5;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -128,7 +128,7 @@ class LogicalTests : public ::testing::Test
         cpu.Y = 0x04;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND AbsoluteY opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x05;
         mem[0xFFFE] = 0x05;
         mem[0x0509] = 0b00001000;
@@ -136,7 +136,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 4;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -147,7 +147,7 @@ class LogicalTests : public ::testing::Test
         cpu.Y = 0xFF;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND AbsoluteX opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x01;
         mem[0xFFFE] = 0x05;
         mem[0x0600] = 0b00001000; // Crossed page boundary
@@ -155,7 +155,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 5;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -166,7 +166,7 @@ class LogicalTests : public ::testing::Test
         cpu.X = 0x02;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND IndexedIndirect opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x05;
         mem[0x0007] = 0x0A;
         mem[0x0008] = 0x0A;
@@ -175,7 +175,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 6;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -186,7 +186,7 @@ class LogicalTests : public ::testing::Test
         cpu.X = 0xFF;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND IndexedIndirect opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x01;
         mem[0x0000] = 0x0A; // (0x01 + 0xFF) & 0xFF = 0x00
         mem[0x0001] = 0x0A;
@@ -195,7 +195,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 6;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -206,7 +206,7 @@ class LogicalTests : public ::testing::Test
         cpu.Y = 0x02;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND IndexedIndirect opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x02;
         mem[0x0002] = 0x00;
         mem[0x0003] = 0x80;
@@ -215,7 +215,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 5;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -226,7 +226,7 @@ class LogicalTests : public ::testing::Test
         cpu.Y = 0xFF;
         cpu.A = 0b10101010;
 
-        mem[0xFFFC] = opcode; // AND IndexedIndirect opcode
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = 0x02;
         mem[0x0002] = 0x01;
         mem[0x0003] = 0x05;
@@ -235,7 +235,7 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 6;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(cpu.A, f(cpu.A, 0b00001000));
+        EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
         EXPECT_FALSE(cpu.Z);
         EXPECT_FALSE(cpu.N);
@@ -254,7 +254,7 @@ TEST_F(LogicalTests, ANDImmediate)
 
 TEST_F(LogicalTests, ANDZeroPage)
 {
-    OpZeroPage(0x29, [](int x, int y)
+    OpZeroPage(0x25, [](int x, int y)
     {
         return x & y;
     });
@@ -262,7 +262,7 @@ TEST_F(LogicalTests, ANDZeroPage)
 
 TEST_F(LogicalTests, ANDZeroPageX)
 {
-    OpZeroPageX(0x29, [](int x, int y)
+    OpZeroPageX(0x35, [](int x, int y)
     {
         return x & y;
     });
