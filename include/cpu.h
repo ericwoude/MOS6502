@@ -100,7 +100,7 @@ class CPU
     };
 
     std::array<Instruction, 256> dispatch_table;
-    void exec_instruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory);
+    void ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory);
 
     // Addressing mode functions
     uint16_t AddrOpcode(uint32_t&, Mem& memory); // Used for debugging illegal opcodes
@@ -159,6 +159,11 @@ class CPU
     void OpPHP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+    // LOGICAL OPERATIONS
+    void OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpEOR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };

@@ -68,6 +68,34 @@ CPU::CPU()
     ADD_DISPATCH(0x08, PHP, Implied);
     ADD_DISPATCH(0x68, PLA, Implied);
     ADD_DISPATCH(0x28, PLP, Implied);
+
+    // LOGICAL OPERATIONS
+    ADD_DISPATCH(0x29, AND, Immediate);
+    ADD_DISPATCH(0x25, AND, ZeroPage);
+    ADD_DISPATCH(0x35, AND, ZeroPageX);
+    ADD_DISPATCH(0x2D, AND, Absolute);
+    ADD_DISPATCH(0x3D, AND, AbsoluteX);
+    ADD_DISPATCH(0x39, AND, AbsoluteY);
+    ADD_DISPATCH(0x21, AND, IndexedIndirect);
+    ADD_DISPATCH(0x31, AND, IndirectIndexed);
+
+    ADD_DISPATCH(0x49, EOR, Immediate);
+    ADD_DISPATCH(0x45, EOR, ZeroPage);
+    ADD_DISPATCH(0x55, EOR, ZeroPageX);
+    ADD_DISPATCH(0x4D, EOR, Absolute);
+    ADD_DISPATCH(0x5D, EOR, AbsoluteX);
+    ADD_DISPATCH(0x59, EOR, AbsoluteY);
+    ADD_DISPATCH(0x41, EOR, IndexedIndirect);
+    ADD_DISPATCH(0x51, EOR, IndirectIndexed);
+
+    ADD_DISPATCH(0x09, ORA, Immediate);
+    ADD_DISPATCH(0x05, ORA, ZeroPage);
+    ADD_DISPATCH(0x15, ORA, ZeroPageX);
+    ADD_DISPATCH(0x0D, ORA, Absolute);
+    ADD_DISPATCH(0x1D, ORA, AbsoluteX);
+    ADD_DISPATCH(0x19, ORA, AbsoluteY);
+    ADD_DISPATCH(0x01, ORA, IndexedIndirect);
+    ADD_DISPATCH(0x11, ORA, IndirectIndexed);
 }
 
 void CPU::Reset(Mem& memory)
@@ -151,7 +179,7 @@ void CPU::LDSetFlags(uint8_t reg)
     N = (reg & 0b1000000) > 0;
 }
 
-void CPU::exec_instruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
+void CPU::ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
 {
     uint16_t address = (this->*instruction.addr)(machine_cycles, memory);
     (this->*instruction.op)(machine_cycles, address, memory);
@@ -164,7 +192,7 @@ uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
     {
         uint8_t instruction = FetchByte(machine_cycles, memory);
         Instruction ins = dispatch_table[instruction];
-        exec_instruction(ins, machine_cycles, memory);
+        ExecInstruction(ins, machine_cycles, memory);
     }
 
     const uint32_t machine_cycles_used = machine_cycles_requested - machine_cycles;
@@ -386,6 +414,24 @@ void CPU::OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     PS = PullFromStack(machine_cycles, memory);
+}
+
+void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    A &=ReadByte(machine_cycles, address, memory);
+    LDSetFlags(A);
+}
+
+void CPU::OpEOR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    A ^= ReadByte(machine_cycles, address, memory);
+    LDSetFlags(A);
+}
+
+void CPU::OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    A |= ReadByte(machine_cycles, address, memory);
+    LDSetFlags(A);
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
