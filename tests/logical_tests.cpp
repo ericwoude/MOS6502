@@ -26,9 +26,10 @@ class LogicalTests : public ::testing::Test
         const uint32_t cycles = 2;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-		EXPECT_EQ( cpu.A, f(0b10101010, 0b00001000) );
-		EXPECT_EQ( used_cycles, cycles );
-		EXPECT_FALSE( cpu.Z );
+		EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
+		EXPECT_EQ(used_cycles, cycles);
+		EXPECT_FALSE(cpu.Z);
+        EXPECT_FALSE(cpu.N);
     }
 
     void OpZeroPage(uint8_t opcode, const std::function<int( int, int )>& f)

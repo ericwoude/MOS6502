@@ -100,7 +100,7 @@ class CPU
     };
 
     std::array<Instruction, 256> dispatch_table;
-    void exec_instruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory);
+    void ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory);
 
     // Addressing mode functions
     uint16_t AddrOpcode(uint32_t&, Mem& memory); // Used for debugging illegal opcodes

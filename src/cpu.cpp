@@ -179,7 +179,7 @@ void CPU::LDSetFlags(uint8_t reg)
     N = (reg & 0b1000000) > 0;
 }
 
-void CPU::exec_instruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
+void CPU::ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
 {
     uint16_t address = (this->*instruction.addr)(machine_cycles, memory);
     (this->*instruction.op)(machine_cycles, address, memory);
@@ -192,7 +192,7 @@ uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
     {
         uint8_t instruction = FetchByte(machine_cycles, memory);
         Instruction ins = dispatch_table[instruction];
-        exec_instruction(ins, machine_cycles, memory);
+        ExecInstruction(ins, machine_cycles, memory);
     }
 
     const uint32_t machine_cycles_used = machine_cycles_requested - machine_cycles;
@@ -418,7 +418,7 @@ void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 
 void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    A &= ReadByte(machine_cycles, address, memory);
+    A &=ReadByte(machine_cycles, address, memory);
     LDSetFlags(A);
 }
 
@@ -433,7 +433,6 @@ void CPU::OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     A |= ReadByte(machine_cycles, address, memory);
     LDSetFlags(A);
 }
-
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
