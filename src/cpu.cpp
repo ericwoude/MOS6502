@@ -96,6 +96,9 @@ CPU::CPU()
     ADD_DISPATCH(0x19, ORA, AbsoluteY);
     ADD_DISPATCH(0x01, ORA, IndexedIndirect);
     ADD_DISPATCH(0x11, ORA, IndirectIndexed);
+
+    ADD_DISPATCH(0x24, BIT, ZeroPage);
+    ADD_DISPATCH(0x2C, BIT, Absolute);
 }
 
 void CPU::Reset(Mem& memory)
@@ -432,6 +435,15 @@ void CPU::OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A |= ReadByte(machine_cycles, address, memory);
     LDSetFlags(A);
+}
+
+void CPU::OpBIT(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t result = ReadByte(machine_cycles, address, memory) & A;
+
+    Z = (result == 0);
+    V = result & 0x40;
+    N = (result & 0b1000000) > 0;
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
