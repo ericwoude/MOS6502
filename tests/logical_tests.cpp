@@ -539,3 +539,40 @@ TEST_F(LogicalTests, ORAIndirectIndexedPageCrossed)
         return x | y;
     });
 }
+
+// Tests for BIT
+
+TEST_F(LogicalTests, BITZeroPage)
+{
+    cpu.A = 0x0F;
+
+    mem[0xFFFC] = 0x24;
+    mem[0xFFFD] = 0x22;
+    mem[0x0022] = 0xF0;
+
+    const uint32_t cycles = 3;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(used_cycles, cycles);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(LogicalTests, BITAbsolute)
+{
+    cpu.A = 0x0F;
+
+    mem[0xFFFC] = 0x2C;
+    mem[0xFFFD] = 0x05;
+    mem[0xFFFE] = 0x05;
+    mem[0x0505] = 0xF0;
+
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(used_cycles, cycles);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.V);
+    EXPECT_FALSE(cpu.N);
+}
