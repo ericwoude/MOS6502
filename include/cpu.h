@@ -166,6 +166,10 @@ class CPU
     void OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpBIT(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
+    // ARITHMETIC OPERATIONS
+    void OpADC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
 
