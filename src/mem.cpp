@@ -20,11 +20,3 @@ uint8_t& Mem::operator[](uint32_t address)
     assert (address <= max_size);
     return data[address];
 }
-
-void Mem::WriteWord(uint16_t value, uint32_t address, uint32_t& machine_cycles)
-{
-    data[address] = value & 0xFF;
-    data[address + 1] = value >> 8;
-
-    machine_cycles -= 2;
-}

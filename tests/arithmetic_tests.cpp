@@ -37,8 +37,35 @@ class ArithmeticTests : public ::testing::Test
         standardTest.N
     };
 
+    void TestADCAbsolute(TestVariables Test)
+	{
+		// given:
+		cpu.Reset( mem );
+		cpu.C = Test.carry;
+		cpu.A = Test.A;
+		cpu.Z = !Test.Z;
+		cpu.N = !Test.N;
+		cpu.V = !Test.V;
+		mem[0xFFFC] = 0x6D;
+		mem[0xFFFD] = 0x00;
+		mem[0xFFFE] = 0x80;
+		mem[0x8000] = Test.M;
+		constexpr uint32_t EXPECTED_CYCLES = 4;
 
-    void TestADCImmediate(TestVariables test)
+		// when:
+		const uint32_t ActualCycles = cpu.Execute( EXPECTED_CYCLES, mem );
+
+		// then:
+		EXPECT_EQ( ActualCycles, EXPECTED_CYCLES );
+		EXPECT_EQ( cpu.A, Test.result );
+		EXPECT_EQ( cpu.C, Test.C );
+		EXPECT_EQ( cpu.Z, Test.Z );
+		EXPECT_EQ( cpu.N, Test.N );
+		EXPECT_EQ( cpu.V, Test.V );
+	}
+
+
+    void TestImmediate(uint8_t opcode, TestVariables test)
     {
         cpu.A = test.A;
 
@@ -47,7 +74,7 @@ class ArithmeticTests : public ::testing::Test
         cpu.V = !test.V;
         cpu.N = !test.N;
 
-        mem[0xFFFC] = 0x69;
+        mem[0xFFFC] = opcode;
         mem[0xFFFD] = test.M;
 
         const uint32_t cycles = 2;
@@ -65,7 +92,7 @@ class ArithmeticTests : public ::testing::Test
 
 // Tests for ADC
 
-TEST_F(ArithmeticTests, ADCAddPositiveToPositive)
+TEST_F(ArithmeticTests, ADCPositiveToPositive)
 {
     TestVariables test;
     test.A = 1;
@@ -77,10 +104,10 @@ TEST_F(ArithmeticTests, ADCAddPositiveToPositive)
     test.V = false;
     test.N = false;
 
-    TestADCImmediate(test);
+    TestImmediate(0x69, test);
 }
 
-TEST_F(ArithmeticTests, ADCAddCarry)
+TEST_F(ArithmeticTests, ADCCarry)
 {
     TestVariables test;
     test.A = 0;
@@ -92,40 +119,40 @@ TEST_F(ArithmeticTests, ADCAddCarry)
     test.V = false;
     test.N = false;
 
-    TestADCImmediate(test);
+    TestImmediate(0x69, test);
 }
 
-TEST_F(ArithmeticTests, ADCAddOverflow)
+TEST_F(ArithmeticTests, ADCOverflow)
 {
     TestVariables test;
-    test.A = 0b11111111;
-    test.M = 0b00000001;
-    test.result = 0b00000000;
-    test.carry = false;
-    test.C = true;
-    test.Z = true;
-    test.V = true;
-    test.N = false;
+	test.carry = false;
+	test.A = 127;
+	test.M = 1;
+	test.result = 128;
+	test.C = false;
+	test.N = true;
+	test.V = true;
+	test.Z = false;
 
-    TestADCImmediate(test);
+	TestImmediate(0x69, test);
 }
 
-TEST_F(ArithmeticTests, ADCAddOverflowCarry)
+TEST_F(ArithmeticTests, ADCOverflowCarry)
 {
     TestVariables test;
-    test.A = 0b11111111;
-    test.M = 0b00000001;
-    test.result = 0b00000001;
-    test.carry = true;
-    test.C = true;
-    test.Z = false;
-    test.V = true;
-    test.N = false;
+	test.carry = true;
+	test.A = 127;
+	test.M = 1;
+	test.result = 129;
+	test.C = false;
+	test.N = true;
+	test.V = true;
+	test.Z = false;
 
-    TestADCImmediate(test);
+    TestImmediate(0x69, test);
 }
 
-TEST_F(ArithmeticTests, ADCAddNegativeToPositive)
+TEST_F(ArithmeticTests, ADCNegativeToPositive)
 {
     TestVariables test;
     test.A = 13;
@@ -137,5 +164,98 @@ TEST_F(ArithmeticTests, ADCAddNegativeToPositive)
     test.V = false;
     test.N = false;
 
-    TestADCImmediate(test);
+    TestImmediate(0x69, test);
+}
+
+// Tests for SBC
+
+TEST_F(ArithmeticTests, SBCZeroFromZero)
+{
+    TestVariables test;
+    test.A = 0;
+    test.M = 0;
+    test.result = 0;
+    test.carry = true;
+    test.C = true;
+    test.Z = true;
+    test.V = false;
+    test.N = false;
+
+    TestImmediate(0xE9, test);
+}
+
+
+TEST_F(ArithmeticTests, SBCOneFromTwo)
+{
+    TestVariables test;
+    test.A = 2;
+    test.M = 1;
+    test.result = 1;
+    test.carry = true;
+    test.C = true;
+    test.Z = false;
+    test.V = false;
+    test.N = false;
+
+    TestImmediate(0xE9, test);
+}
+
+TEST_F(ArithmeticTests, SBCOneFromZero)
+{
+    TestVariables test;
+    test.A = 0;
+    test.M = 1;
+    test.result = (uint8_t) -1;
+    test.carry = true;
+    test.C = false;
+    test.Z = false;
+    test.V = false;
+    test.N = true;
+
+    TestImmediate(0xE9, test);
+}
+
+TEST_F(ArithmeticTests, SBCCarry)
+{
+    TestVariables test;
+    test.A = 0;
+    test.M = 1;
+    test.result = (uint8_t) -2;
+    test.carry = false;
+    test.C = false;
+    test.Z = false;
+    test.V = false;
+    test.N = true;
+
+    TestImmediate(0xE9, test);
+}
+
+TEST_F(ArithmeticTests, SBCOverflow)
+{
+    TestVariables test;
+    test.A = (uint8_t) -128;
+    test.M = 1;
+    test.result = 127;
+    test.carry = true;
+    test.C = true;
+    test.Z = false;
+    test.V = true;
+    test.N = false;
+
+    TestImmediate(0xE9, test);
+}
+
+TEST_F(ArithmeticTests, SBCOverflow2)
+{
+    TestVariables test;
+    test.A = 127;
+    test.M = (uint8_t) -1;
+    test.result = 128;
+    test.carry = true;
+    test.C = false;
+    test.Z = false;
+    test.V = true;
+    test.N = true;
+
+    TestImmediate(0xE9, test);
 }
