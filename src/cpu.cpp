@@ -118,6 +118,23 @@ CPU::CPU()
     ADD_DISPATCH(0xF9, SBC, AbsoluteY);
     ADD_DISPATCH(0xE1, SBC, IndexedIndirect);
     ADD_DISPATCH(0xF1, SBC, IndirectIndexed);
+
+    ADD_DISPATCH(0xC9, CMP, Immediate);
+    ADD_DISPATCH(0xC5, CMP, ZeroPage);
+    ADD_DISPATCH(0xD5, CMP, ZeroPageX);
+    ADD_DISPATCH(0xCD, CMP, Absolute);
+    ADD_DISPATCH(0xDD, CMP, AbsoluteX);
+    ADD_DISPATCH(0xD9, CMP, AbsoluteY);
+    ADD_DISPATCH(0xC1, CMP, IndexedIndirect);
+    ADD_DISPATCH(0xD1, CMP, IndirectIndexed);
+
+    ADD_DISPATCH(0xE0, CPX, Immediate);
+    ADD_DISPATCH(0xE4, CPX, ZeroPage);
+    ADD_DISPATCH(0xEC, CPX, Absolute);
+
+    ADD_DISPATCH(0xC0, CPY, Immediate);
+    ADD_DISPATCH(0xC4, CPY, ZeroPage);
+    ADD_DISPATCH(0xCC, CPY, Absolute);
 }
 
 void CPU::Reset(Mem& memory)
@@ -490,6 +507,29 @@ void CPU::OpSBC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     OpADC(machine_cycles, address, memory);
 }
 
+void CPU::OpCMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    C = (A >= operand);
+    Z = (A == operand);
+    N = ((A - operand) & 0b10000000) > 0;
+}
+
+void CPU::OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    C = (X >= operand);
+    Z = (X == operand);
+    N = ((X - operand) & 0b10000000) > 0;
+}
+
+void CPU::OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    C = (Y >= operand);
+    Z = (Y == operand);
+    N = ((Y - operand) & 0b10000000) > 0;
+}
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {

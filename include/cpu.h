@@ -169,7 +169,9 @@ class CPU
     // ARITHMETIC OPERATIONS
     void OpADC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpSBC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
-
+    void OpCMP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
