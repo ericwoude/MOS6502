@@ -1,17 +1,41 @@
+/*
+ * This file is part of the MOS6502 emulator.
+ * (https://github.com/ericwoude/MOS6502)
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright © 2021 Eric van der Woude
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the “Software”), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #include <gtest/gtest.h>
 
 #include "cpu.h"
 
 class LoadTests : public ::testing::Test
 {
-    public:
+   public:
     Mem mem;
     CPU cpu;
 
-    protected:
+   protected:
     void SetUp() override
     {
-      cpu.Reset(mem);
+        cpu.Reset(mem);
     }
 };
 
@@ -56,7 +80,7 @@ TEST_F(LoadTests, LDAZeroPageX)
     mem[0xFFFC] = CPU::LDA_ZPX;
     mem[0xFFFD] = 0x05;
     mem[0x000F] = 0x22;
-    
+
     const uint32_t cycles = 4;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
@@ -91,7 +115,7 @@ TEST_F(LoadTests, LDAAbsolute)
     mem[0xFFFD] = 0x05;
     mem[0xFFFE] = 0x05;
     mem[0x0505] = 0x22;
-    
+
     const uint32_t cycles = 4;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
@@ -166,7 +190,7 @@ TEST_F(LoadTests, LDAIndirectXWrapAround)
     // INLINE PROGRAM
     mem[0xFFFC] = CPU::LDA_INDX;
     mem[0xFFFD] = 0x01;
-    mem[0x0000] = 0x0A; // (0x01 + 0xFF) & 0xFF = 0x00
+    mem[0x0000] = 0x0A;  // (0x01 + 0xFF) & 0xFF = 0x00
     mem[0x0001] = 0x0A;
     mem[0x0A0A] = 0x22;
 
@@ -208,7 +232,7 @@ TEST_F(LoadTests, LDAIndirectYPageCrossed)
     mem[0xFFFD] = 0x02;
     mem[0x0002] = 0x01;
     mem[0x0003] = 0x0A;
-    mem[0x0B00] = 0x22; // 0x0A01 + 0xFF = 0x0B00
+    mem[0x0B00] = 0x22;  // 0x0A01 + 0xFF = 0x0B00
 
     const uint32_t cycles = 6;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
@@ -260,7 +284,7 @@ TEST_F(LoadTests, LDXZeroPageY)
     mem[0xFFFC] = CPU::LDX_ZPY;
     mem[0xFFFD] = 0x05;
     mem[0x000F] = 0x22;
-    
+
     const uint32_t cycles = 4;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
@@ -295,7 +319,7 @@ TEST_F(LoadTests, LDXAbsolute)
     mem[0xFFFD] = 0x05;
     mem[0xFFFE] = 0x05;
     mem[0x0505] = 0x22;
-    
+
     const uint32_t cycles = 4;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
@@ -365,7 +389,7 @@ TEST_F(LoadTests, LDYZeroPageX)
     mem[0xFFFC] = CPU::LDY_ZPX;
     mem[0xFFFD] = 0x05;
     mem[0x000F] = 0x22;
-    
+
     const uint32_t cycles = 4;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
@@ -401,7 +425,7 @@ TEST_F(LoadTests, LDYAbsoluteX)
     mem[0xFFFD] = 0x01;
     mem[0xFFFE] = 0x01;
     mem[0x0103] = 0x22;
-    
+
     const uint32_t cycles = 4;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
