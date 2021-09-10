@@ -28,8 +28,6 @@ class LogicalTests : public ::testing::Test
 
 		EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
 		EXPECT_EQ(used_cycles, cycles);
-		EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpZeroPage(uint8_t opcode, const std::function<int( int, int )>& f)
@@ -45,8 +43,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpZeroPageX(uint8_t opcode, const std::function<int( int, int )>& f)
@@ -63,8 +59,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpAbsolute(uint8_t opcode, const std::function<int( int, int )>& f)
@@ -82,8 +76,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpAbsoluteX(uint8_t opcode, const std::function<int(int, int)>& f)
@@ -101,8 +93,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpAbsoluteXPageCrossed(uint8_t opcode, const std::function<int(int, int)>& f)
@@ -120,8 +110,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpAbsoluteY(uint8_t opcode, const std::function<int(int, int)>& f)
@@ -139,8 +127,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpAbsoluteYPageCrossed(uint8_t opcode, const std::function<int(int, int)>& f)
@@ -158,8 +144,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpIndexedIndirect(uint8_t opcode, const std::function<int(int, int)>& f)
@@ -178,8 +162,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpIndexedIndirectPageCrossed(uint8_t opcode, const std::function<int(int, int)>& f)
@@ -198,8 +180,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpIndirectIndexed(uint8_t opcode, const std::function<int(int, int)>& f)
@@ -218,8 +198,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 
     void OpIndirectIndexedPageCrossed(uint8_t opcode, const std::function<int(int, int)>& f)
@@ -238,8 +216,6 @@ class LogicalTests : public ::testing::Test
 
         EXPECT_EQ(cpu.A, f(0b10101010, 0b00001000));
         EXPECT_EQ(cycles, used_cycles);
-        EXPECT_FALSE(cpu.Z);
-        EXPECT_FALSE(cpu.N);
     }
 };
 
@@ -251,6 +227,9 @@ TEST_F(LogicalTests, ANDImmediate)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDZeroPage)
@@ -259,6 +238,9 @@ TEST_F(LogicalTests, ANDZeroPage)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDZeroPageX)
@@ -267,6 +249,9 @@ TEST_F(LogicalTests, ANDZeroPageX)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDAbsolute)
@@ -275,6 +260,9 @@ TEST_F(LogicalTests, ANDAbsolute)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDAbsoluteX)
@@ -283,6 +271,9 @@ TEST_F(LogicalTests, ANDAbsoluteX)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDAbsoluteXPageCrossed)
@@ -292,6 +283,9 @@ TEST_F(LogicalTests, ANDAbsoluteXPageCrossed)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDAbsoluteY)
@@ -300,6 +294,9 @@ TEST_F(LogicalTests, ANDAbsoluteY)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDAbsoluteYPageCrossed)
@@ -308,6 +305,9 @@ TEST_F(LogicalTests, ANDAbsoluteYPageCrossed)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDIndexedIndirect)
@@ -316,6 +316,9 @@ TEST_F(LogicalTests, ANDIndexedIndirect)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDIndexedIndirectPageCrossed)
@@ -324,6 +327,9 @@ TEST_F(LogicalTests, ANDIndexedIndirectPageCrossed)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDIndirectIndexed)
@@ -332,6 +338,9 @@ TEST_F(LogicalTests, ANDIndirectIndexed)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ANDIndirectIndexedPageCrossed)
@@ -340,6 +349,9 @@ TEST_F(LogicalTests, ANDIndirectIndexedPageCrossed)
     {
         return x & y;
     });
+
+    EXPECT_FALSE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 // TESTS FOR EOR
@@ -350,6 +362,9 @@ TEST_F(LogicalTests, EORImmediate)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORZeroPage)
@@ -358,6 +373,9 @@ TEST_F(LogicalTests, EORZeroPage)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORZeroPageX)
@@ -366,6 +384,9 @@ TEST_F(LogicalTests, EORZeroPageX)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORAbsolute)
@@ -374,6 +395,9 @@ TEST_F(LogicalTests, EORAbsolute)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORAbsoluteX)
@@ -382,6 +406,9 @@ TEST_F(LogicalTests, EORAbsoluteX)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORAbsoluteXPageCrossed)
@@ -391,6 +418,9 @@ TEST_F(LogicalTests, EORAbsoluteXPageCrossed)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORAbsoluteY)
@@ -399,6 +429,9 @@ TEST_F(LogicalTests, EORAbsoluteY)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORAbsoluteYPageCrossed)
@@ -407,6 +440,9 @@ TEST_F(LogicalTests, EORAbsoluteYPageCrossed)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORIndexedIndirect)
@@ -415,6 +451,9 @@ TEST_F(LogicalTests, EORIndexedIndirect)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORIndexedIndirectPageCrossed)
@@ -423,6 +462,9 @@ TEST_F(LogicalTests, EORIndexedIndirectPageCrossed)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORIndirectIndexed)
@@ -431,6 +473,9 @@ TEST_F(LogicalTests, EORIndirectIndexed)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, EORIndirectIndexedPageCrossed)
@@ -439,6 +484,9 @@ TEST_F(LogicalTests, EORIndirectIndexedPageCrossed)
     {
         return x ^ y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 // TESTS FOR ORA
@@ -449,6 +497,9 @@ TEST_F(LogicalTests, ORAImmediate)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ORAZeroPage)
@@ -457,6 +508,9 @@ TEST_F(LogicalTests, ORAZeroPage)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ORAZeroPageX)
@@ -465,7 +519,11 @@ TEST_F(LogicalTests, ORAZeroPageX)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 TEST_F(LogicalTests, ORAAbsolute)
 {
@@ -473,7 +531,11 @@ TEST_F(LogicalTests, ORAAbsolute)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 TEST_F(LogicalTests, ORAAbsoluteX)
 {
@@ -481,7 +543,11 @@ TEST_F(LogicalTests, ORAAbsoluteX)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 TEST_F(LogicalTests, ORAAbsoluteXPageCrossed)
 {
@@ -490,7 +556,11 @@ TEST_F(LogicalTests, ORAAbsoluteXPageCrossed)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 TEST_F(LogicalTests, ORAAbsoluteY)
 {
@@ -498,7 +568,11 @@ TEST_F(LogicalTests, ORAAbsoluteY)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 TEST_F(LogicalTests, ORAAbsoluteYPageCrossed)
 {
@@ -506,7 +580,11 @@ TEST_F(LogicalTests, ORAAbsoluteYPageCrossed)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 TEST_F(LogicalTests, ORAIndexedIndirect)
 {
@@ -514,6 +592,9 @@ TEST_F(LogicalTests, ORAIndexedIndirect)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
 
 TEST_F(LogicalTests, ORAIndexedIndirectPageCrossed)
@@ -522,7 +603,11 @@ TEST_F(LogicalTests, ORAIndexedIndirectPageCrossed)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 TEST_F(LogicalTests, ORAIndirectIndexed)
 {
@@ -530,7 +615,11 @@ TEST_F(LogicalTests, ORAIndirectIndexed)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 TEST_F(LogicalTests, ORAIndirectIndexedPageCrossed)
 {
@@ -538,7 +627,11 @@ TEST_F(LogicalTests, ORAIndirectIndexedPageCrossed)
     {
         return x | y;
     });
+
+    EXPECT_TRUE(cpu.N);
+    EXPECT_FALSE(cpu.Z);
 }
+
 
 // Tests for BIT
 

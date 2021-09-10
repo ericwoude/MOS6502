@@ -222,10 +222,10 @@ uint8_t CPU::PullFromStack(uint32_t& machine_cycles, Mem& memory)
 }
 
 // Instruction specific functions
-void CPU::LDSetFlags(uint8_t reg)
+void CPU::SetFlagsZN(uint8_t reg)
 {
     Z = (reg == 0);
-    N = (reg & 0b1000000) > 0;
+    N = (reg & 0b10000000) > 0;
 }
 
 void CPU::ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
@@ -374,19 +374,19 @@ uint16_t CPU::AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory)
 void CPU::OpLDA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A = ReadByte(machine_cycles, address, memory);
-    LDSetFlags(A);
+    SetFlagsZN(A);
 }
 
 void CPU::OpLDX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     X = ReadByte(machine_cycles, address, memory);
-    LDSetFlags(X);
+    SetFlagsZN(X);
 }
 
 void CPU::OpLDY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     Y = ReadByte(machine_cycles, address, memory);
-    LDSetFlags(Y);
+    SetFlagsZN(Y);
 }
 
 void CPU::OpSTA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
@@ -408,34 +408,34 @@ void CPU::OpTAX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     X = A;
     machine_cycles--;
-    LDSetFlags(X);
+    SetFlagsZN(X);
 }
 void CPU::OpTAY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     Y = A;
     machine_cycles--;
-    LDSetFlags(Y);
+    SetFlagsZN(Y);
 
 }
 void CPU::OpTXA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A = X;
     machine_cycles--;
-    LDSetFlags(A);
+    SetFlagsZN(A);
 
 }
 void CPU::OpTYA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A = Y;
     machine_cycles--;
-    LDSetFlags(A);
+    SetFlagsZN(A);
 }
 
 void CPU::OpTSX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     X = SP;
     machine_cycles--;
-    LDSetFlags(X);
+    SetFlagsZN(X);
 }
 
 void CPU::OpTXS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
@@ -457,7 +457,7 @@ void CPU::OpPHP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 void CPU::OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A = PullFromStack(machine_cycles, memory);
-    LDSetFlags(A);
+    SetFlagsZN(A);
 }
 
 void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
@@ -468,19 +468,19 @@ void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A &=ReadByte(machine_cycles, address, memory);
-    LDSetFlags(A);
+    SetFlagsZN(A);
 }
 
 void CPU::OpEOR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A ^= ReadByte(machine_cycles, address, memory);
-    LDSetFlags(A);
+    SetFlagsZN(A);
 }
 
 void CPU::OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A |= ReadByte(machine_cycles, address, memory);
-    LDSetFlags(A);
+    SetFlagsZN(A);
 }
 
 void CPU::OpBIT(uint32_t& machine_cycles, uint16_t address, Mem& memory)
@@ -546,21 +546,21 @@ void CPU::OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     uint8_t result = 1 + ReadByte(machine_cycles, address, memory);
     StoreByte(machine_cycles, address, result, memory);
     machine_cycles--;
-    LDSetFlags(result);
+    SetFlagsZN(result);
 }
 
 void CPU::OpINX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     X++;
     machine_cycles--;
-    LDSetFlags(X);
+    SetFlagsZN(X);
 }
 
 void CPU::OpINY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     Y++;
     machine_cycles--;
-    LDSetFlags(Y);
+    SetFlagsZN(Y);
 }
 
 

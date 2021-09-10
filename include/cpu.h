@@ -119,7 +119,7 @@ class CPU
     uint16_t AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory);
 
     // Sets the Z, N flag for the LDA, LDX and LDY instructions.
-    void LDSetFlags(uint8_t reg);
+    void SetFlagsZN(uint8_t reg);
 
     // Fetch a single byte from memory offsetted by the PC.
     uint8_t FetchByte(uint32_t& machine_cycles, Mem& memory);
