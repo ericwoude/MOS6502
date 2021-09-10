@@ -116,7 +116,6 @@ TEST_F(IncrementsDecrementsTest, INCOverflow)
     EXPECT_FALSE(cpu.N);
 }
 
-
 // Tests for INX
 
 TEST_F(IncrementsDecrementsTest, INXZero)
@@ -149,4 +148,46 @@ TEST_F(IncrementsDecrementsTest, INYOverflow)
 TEST_F(IncrementsDecrementsTest, INYNegative)
 {
     TestIncrementNegative(0xC8, cpu.Y);
+}
+
+// TESTS FOR DEC
+
+TEST_F(IncrementsDecrementsTest, DECSimple)
+{
+    cpu.Z = true;
+    cpu.N = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0xC6;
+    mem[0xFFFD] = 0x22;
+    mem[0x0022] = 2;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0022], 1);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(IncrementsDecrementsTest, DECOverflow)
+{
+    cpu.Z = true;
+    cpu.N = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0xC6;
+    mem[0xFFFD] = 0x22;
+    mem[0x0022] = 0;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0022], 0xFF);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_TRUE(cpu.N);
 }

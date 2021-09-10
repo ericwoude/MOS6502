@@ -141,10 +141,13 @@ CPU::CPU()
     ADD_DISPATCH(0xF6, INC, ZeroPageX);
     ADD_DISPATCH(0xEE, INC, Absolute);
     ADD_DISPATCH(0xFE, INC, AbsoluteX);
-
     ADD_DISPATCH(0xE8, INX, Implied);
-
     ADD_DISPATCH(0xC8, INY, Implied);
+
+    ADD_DISPATCH(0xC6, DEC, ZeroPage);
+    ADD_DISPATCH(0xD6, DEC, ZeroPageX);
+    ADD_DISPATCH(0xCE, DEC, Absolute);
+    ADD_DISPATCH(0xDE, DEC, AbsoluteX);
 }
 
 void CPU::Reset(Mem& memory)
@@ -543,9 +546,10 @@ void CPU::OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 
 void CPU::OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    uint8_t result = 1 + ReadByte(machine_cycles, address, memory);
-    StoreByte(machine_cycles, address, result, memory);
+    uint8_t result = ReadByte(machine_cycles, address, memory);
+    result++;
     machine_cycles--;
+    StoreByte(machine_cycles, address, result, memory);
     SetFlagsZN(result);
 }
 
@@ -562,6 +566,16 @@ void CPU::OpINY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     machine_cycles--;
     SetFlagsZN(Y);
 }
+
+void CPU::OpDEC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t result = ReadByte(machine_cycles, address, memory);
+    result--;
+    machine_cycles--;
+    StoreByte(machine_cycles, address, result, memory);
+    SetFlagsZN(result);
+}
+
 
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
