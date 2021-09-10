@@ -80,7 +80,7 @@ TEST_F(StackOperationTests, TSX)
     cpu.SP = 0x0A;
 
     // INLINE PROGRAM
-    mem[0xFFFC] = CPU::TSX;
+    mem[0xFFFC] = 0xBA;
 
     const uint32_t cycles = 2;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
@@ -96,7 +96,7 @@ TEST_F(StackOperationTests, TXS)
     cpu.X = 0x0A;
 
     // INLINE PROGRAM
-    mem[0xFFFC] = CPU::TXS;
+    mem[0xFFFC] = 0x9A;
 
     const uint32_t cycles = 2;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
@@ -107,17 +107,17 @@ TEST_F(StackOperationTests, TXS)
 
 TEST_F(StackOperationTests, PHA)
 {
-    TestPushOnStack(CPU::PHA, cpu.A);
+    TestPushOnStack(0x48, cpu.A);
 }
 
 TEST_F(StackOperationTests, PHP)
 {
-    TestPushOnStack(CPU::PHP, cpu.PS);
+    TestPushOnStack(0x08, cpu.PS);
 }
 
 TEST_F(StackOperationTests, PLA)
 {
-    TestPullFromStack(CPU::PLA, cpu.A);
+    TestPullFromStack(0x68, cpu.A);
 
     // The N, Z flags are set accordingly.
     EXPECT_FALSE(cpu.Z);
@@ -127,7 +127,7 @@ TEST_F(StackOperationTests, PLA)
 TEST_F(StackOperationTests, PLP)
 {
     // Will pull 0b11111111 from stack into PS
-    TestPullFromStack(CPU::PLP, cpu.PS);
+    TestPullFromStack(0x28, cpu.PS);
 
     // Test all flags are set accordingly.
     EXPECT_TRUE(cpu.C);

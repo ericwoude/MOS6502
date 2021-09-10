@@ -61,29 +61,6 @@ class CPU
         };
     };
 
-    // Opcodes
-    static constexpr uint8_t LDA_IM = 0xA9, LDA_ZP = 0xA5, LDA_ZPX = 0xB5, LDA_ABS = 0x6D,
-                             LDA_ABSX = 0xBD, LDA_ABSY = 0xB9, LDA_INDX = 0xA1, LDA_INDY = 0xB1,
-
-                             LDX_IM = 0xA2, LDX_ZP = 0xA6, LDX_ZPY = 0xB6, LDX_ABS = 0xAE,
-                             LDX_ABSY = 0xBE,
-
-                             LDY_IM = 0xA0, LDY_ZP = 0xA4, LDY_ZPX = 0xB4, LDY_ABS = 0xAC,
-                             LDY_ABSX = 0xBC,
-
-                             STA_ZP = 0x85, STA_ZPX = 0x95, STA_ABS = 0x8D, STA_ABSX = 0x9D,
-                             STA_ABSY = 0x99, STA_INDX = 0x81, STA_INDY = 0x91,
-
-                             STX_ZP = 0x86, STX_ZPY = 0x96, STX_ABS = 0x8E,
-
-                             STY_ZP = 0x84, STY_ZPX = 0x94, STY_ABS = 0x8C,
-
-                             TAX = 0xAA, TAY = 0xA8, TXA = 0x8A, TYA = 0x98,
-
-                             TSX = 0xBA, TXS = 0x9A, PHA = 0x48, PHP = 0x08, PLA = 0x68, PLP = 0x28,
-
-                             JPS_A = 0x20;
-
    private:
     using AddressExecution = uint16_t (CPU::*)(uint32_t&, Mem&);
     using OperationExecution = void (CPU::*)(uint32_t&, uint16_t, Mem&);

@@ -57,20 +57,20 @@ class RegisterTransferTests : public ::testing::Test
 
 TEST_F(RegisterTransferTests, TAX)
 {
-    TestTransferRegister(CPU::TAX, cpu.A, cpu.X);
+    TestTransferRegister(0xAA, cpu.A, cpu.X);
 }
 
 TEST_F(RegisterTransferTests, TAY)
 {
-    TestTransferRegister(CPU::TAY, cpu.A, cpu.Y);
+    TestTransferRegister(0xA8, cpu.A, cpu.Y);
 }
 
 TEST_F(RegisterTransferTests, TXA)
 {
-    TestTransferRegister(CPU::TXA, cpu.X, cpu.A);
+    TestTransferRegister(0x8A, cpu.X, cpu.A);
 }
 
 TEST_F(RegisterTransferTests, TYA)
 {
-    TestTransferRegister(CPU::TYA, cpu.Y, cpu.A);
+    TestTransferRegister(0x98, cpu.Y, cpu.A);
 }
