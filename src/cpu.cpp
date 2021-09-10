@@ -99,6 +99,42 @@ CPU::CPU()
 
     ADD_DISPATCH(0x24, BIT, ZeroPage);
     ADD_DISPATCH(0x2C, BIT, Absolute);
+
+    // ARITHMETIC OPERATIONS
+    ADD_DISPATCH(0x69, ADC, Immediate);
+    ADD_DISPATCH(0x65, ADC, ZeroPage);
+    ADD_DISPATCH(0x75, ADC, ZeroPageX);
+    ADD_DISPATCH(0x6D, ADC, Absolute);
+    ADD_DISPATCH(0x7D, ADC, AbsoluteX);
+    ADD_DISPATCH(0x79, ADC, AbsoluteY);
+    ADD_DISPATCH(0x61, ADC, IndexedIndirect);
+    ADD_DISPATCH(0x71, ADC, IndirectIndexed);
+
+    ADD_DISPATCH(0xE9, SBC, Immediate);
+    ADD_DISPATCH(0xE5, SBC, ZeroPage);
+    ADD_DISPATCH(0xF5, SBC, ZeroPageX);
+    ADD_DISPATCH(0xED, SBC, Absolute);
+    ADD_DISPATCH(0xFD, SBC, AbsoluteX);
+    ADD_DISPATCH(0xF9, SBC, AbsoluteY);
+    ADD_DISPATCH(0xE1, SBC, IndexedIndirect);
+    ADD_DISPATCH(0xF1, SBC, IndirectIndexed);
+
+    ADD_DISPATCH(0xC9, CMP, Immediate);
+    ADD_DISPATCH(0xC5, CMP, ZeroPage);
+    ADD_DISPATCH(0xD5, CMP, ZeroPageX);
+    ADD_DISPATCH(0xCD, CMP, Absolute);
+    ADD_DISPATCH(0xDD, CMP, AbsoluteX);
+    ADD_DISPATCH(0xD9, CMP, AbsoluteY);
+    ADD_DISPATCH(0xC1, CMP, IndexedIndirect);
+    ADD_DISPATCH(0xD1, CMP, IndirectIndexed);
+
+    ADD_DISPATCH(0xE0, CPX, Immediate);
+    ADD_DISPATCH(0xE4, CPX, ZeroPage);
+    ADD_DISPATCH(0xEC, CPX, Absolute);
+
+    ADD_DISPATCH(0xC0, CPY, Immediate);
+    ADD_DISPATCH(0xC4, CPY, ZeroPage);
+    ADD_DISPATCH(0xCC, CPY, Absolute);
 }
 
 void CPU::Reset(Mem& memory)
@@ -444,6 +480,55 @@ void CPU::OpBIT(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     Z = (result == 0);
     V = result & 0x40;
     N = (result & 0b1000000) > 0;
+}
+
+void CPU::OpADC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    const bool sign_bits_match = !(operand & 0b10000000) ^ (A & 0b10000000);
+
+    uint16_t sum = A + C + operand;
+    A = (sum & 0xFF);
+
+    // The addition overflowed if the sign bit of the
+    // operand and the pre-addition accumulator matched and...
+    // if the sign bit of the pre-op accumulator and
+    // the result differ.
+    V = sign_bits_match && ((A ^ operand) & 0b10000000);
+    Z = (A == 0);
+    N = (A & 0b10000000) > 0;
+    C = (sum > 0xFF);
+}
+
+void CPU::OpSBC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    // Subtraction is the same as addition with the negated operand.
+    memory[address] = ~memory[address];
+    OpADC(machine_cycles, address, memory);
+}
+
+void CPU::OpCMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    C = (A >= operand);
+    Z = (A == operand);
+    N = ((A - operand) & 0b10000000) > 0;
+}
+
+void CPU::OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    C = (X >= operand);
+    Z = (X == operand);
+    N = ((X - operand) & 0b10000000) > 0;
+}
+
+void CPU::OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    C = (Y >= operand);
+    Z = (Y == operand);
+    N = ((Y - operand) & 0b10000000) > 0;
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)

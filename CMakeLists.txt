@@ -35,6 +35,7 @@ add_executable(
     tests/register_transfer_tests.cpp
     tests/stack_operations_tests.cpp
     tests/logical_tests.cpp
+    tests/arithmetic_tests.cpp
 )
 
 target_link_libraries(
