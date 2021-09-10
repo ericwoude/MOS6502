@@ -37,34 +37,6 @@ class ArithmeticTests : public ::testing::Test
         standardTest.N
     };
 
-    void TestADCAbsolute(TestVariables Test)
-	{
-		// given:
-		cpu.Reset( mem );
-		cpu.C = Test.carry;
-		cpu.A = Test.A;
-		cpu.Z = !Test.Z;
-		cpu.N = !Test.N;
-		cpu.V = !Test.V;
-		mem[0xFFFC] = 0x6D;
-		mem[0xFFFD] = 0x00;
-		mem[0xFFFE] = 0x80;
-		mem[0x8000] = Test.M;
-		constexpr uint32_t EXPECTED_CYCLES = 4;
-
-		// when:
-		const uint32_t ActualCycles = cpu.Execute( EXPECTED_CYCLES, mem );
-
-		// then:
-		EXPECT_EQ( ActualCycles, EXPECTED_CYCLES );
-		EXPECT_EQ( cpu.A, Test.result );
-		EXPECT_EQ( cpu.C, Test.C );
-		EXPECT_EQ( cpu.Z, Test.Z );
-		EXPECT_EQ( cpu.N, Test.N );
-		EXPECT_EQ( cpu.V, Test.V );
-	}
-
-
     void TestImmediate(uint8_t opcode, TestVariables test)
     {
         cpu.A = test.A;
@@ -87,6 +59,69 @@ class ArithmeticTests : public ::testing::Test
         EXPECT_EQ(cpu.Z, test.Z);
         EXPECT_EQ(cpu.V, test.V);
         EXPECT_EQ(cpu.N, test.N);
+    }
+
+    void CMLessM(uint8_t opcode, uint8_t& reg)
+    {
+        cpu.C = true;
+        cpu.Z = true;
+        cpu.N = false;
+
+        reg = 2;
+
+        mem[0xFFFC] = opcode;
+        mem[0xFFFD] = 3;
+
+        const uint32_t cycles = 2;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+        EXPECT_EQ(cycles, used_cycles);
+
+        EXPECT_FALSE(cpu.C);
+        EXPECT_FALSE(cpu.Z);
+        EXPECT_TRUE(cpu.N);
+    }
+
+    void CMEqualsM(uint8_t opcode, uint8_t& reg)
+    {
+        cpu.C = false;
+        cpu.Z = false;
+        cpu.N = true;
+
+        reg = 55;
+
+        mem[0xFFFC] = opcode;
+        mem[0xFFFD] = 55;
+
+        const uint32_t cycles = 2;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+        EXPECT_EQ(cycles, used_cycles);
+
+        EXPECT_TRUE(cpu.C);
+        EXPECT_TRUE(cpu.Z);
+        EXPECT_FALSE(cpu.N);
+    }
+
+    void CMGreaterM(uint8_t opcode, uint8_t& reg)
+    {
+        cpu.C = false;
+        cpu.Z = true;
+        cpu.N = true;
+
+        reg = 0x93;
+
+        mem[0xFFFC] = opcode;
+        mem[0xFFFD] = 0x20;
+
+        const uint32_t cycles = 2;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+        EXPECT_EQ(cycles, used_cycles);
+
+        EXPECT_TRUE(cpu.C);
+        EXPECT_FALSE(cpu.Z);
+        EXPECT_FALSE(cpu.N);
     }
 };
 
@@ -258,4 +293,55 @@ TEST_F(ArithmeticTests, SBCOverflow2)
     test.N = true;
 
     TestImmediate(0xE9, test);
+}
+
+// Tests for CMP
+
+TEST_F(ArithmeticTests, CMPLessM)
+{
+    CMLessM(0xC9, cpu.A);
+}
+
+TEST_F(ArithmeticTests, CMPEqualsM)
+{
+    CMEqualsM(0xC9, cpu.A);
+}
+
+TEST_F(ArithmeticTests, CMPGreaterM)
+{
+    CMGreaterM(0xC9, cpu.A);
+}
+
+// Tests for CPX
+
+TEST_F(ArithmeticTests, CPXLessM)
+{
+    CMLessM(0xE0, cpu.X);
+}
+
+TEST_F(ArithmeticTests, CPXEqualsM)
+{
+    CMEqualsM(0xE0, cpu.X);
+}
+
+TEST_F(ArithmeticTests, CPXGreaterM)
+{
+    CMGreaterM(0xE0, cpu.X);
+}
+
+// Tests for CPY
+
+TEST_F(ArithmeticTests, CPYLessM)
+{
+    CMLessM(0xC0, cpu.Y);
+}
+
+TEST_F(ArithmeticTests, CPYEqualsM)
+{
+    CMEqualsM(0xC0, cpu.Y);
+}
+
+TEST_F(ArithmeticTests, CPYGreaterM)
+{
+    CMGreaterM(0xC0, cpu.Y);
 }
