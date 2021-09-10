@@ -1,11 +1,35 @@
+/*
+ * This file is part of the MOS6502 emulator.
+ * (https://github.com/ericwoude/MOS6502)
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright © 2021 Eric van der Woude
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the “Software”), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #include "cpu.h"
 
 #include <iomanip>
 #include <sstream>
 
-#define ADD_DISPATCH(HEX, NAME, ADDRESSING_MODE)         \
+#define ADD_DISPATCH(HEX, NAME, ADDRESSING_MODE)    \
     instruction.addr = &CPU::Addr##ADDRESSING_MODE; \
-    instruction.op = &CPU::Op##NAME;               \
+    instruction.op = &CPU::Op##NAME;                \
     dispatch_table[HEX] = instruction
 
 CPU::CPU()
@@ -16,7 +40,6 @@ CPU::CPU()
     instruction.op = &CPU::OpIllegal;
     dispatch_table.fill(instruction);
 
-    // Actual data for dispatch 
     // LOAD & STORE
     ADD_DISPATCH(0xA9, LDA, Immediate);
     ADD_DISPATCH(0xA5, LDA, ZeroPage);
@@ -61,7 +84,7 @@ CPU::CPU()
     ADD_DISPATCH(0x8A, TXA, Implied);
     ADD_DISPATCH(0x98, TYA, Implied);
 
-    // STACK OPERATIONS 
+    // STACK OPERATIONS
     ADD_DISPATCH(0xBA, TSX, Implied);
     ADD_DISPATCH(0x9A, TXS, Implied);
     ADD_DISPATCH(0x48, PHA, Implied);
@@ -150,7 +173,6 @@ CPU::CPU()
     ADD_DISPATCH(0xDE, DEC, AbsoluteX);
     ADD_DISPATCH(0xCA, DEX, Implied);
     ADD_DISPATCH(0x88, DEY, Implied);
-
 }
 
 void CPU::Reset(Mem& memory)
@@ -162,7 +184,9 @@ void CPU::Reset(Mem& memory)
     PS = 0b00000000;
 
     // Reset general-purpose registers
-    A = 0; X = 0; Y = 0;
+    A = 0;
+    X = 0;
+    Y = 0;
 
     // Fill memory with 0s.
     memory.Initialize();
@@ -184,7 +208,7 @@ uint16_t CPU::FetchWord(uint32_t& machine_cycles, Mem& memory)
     w |= (memory[PC + 1] << 8);
 
     PC += 2;
-    machine_cycles -=2;
+    machine_cycles -= 2;
 
     return w;
 }
@@ -222,7 +246,7 @@ void CPU::PushToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory)
 uint8_t CPU::PullFromStack(uint32_t& machine_cycles, Mem& memory)
 {
     SP++;
-    machine_cycles -= 2; // Why does this consume three cycles (four total)?
+    machine_cycles -= 2;  // Why does this consume three cycles (four total)?
 
     return ReadByte(machine_cycles, 0x100 + SP, memory);
 }
@@ -251,7 +275,7 @@ uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
     }
 
     const uint32_t machine_cycles_used = machine_cycles_requested - machine_cycles;
-	return machine_cycles_used;
+    return machine_cycles_used;
 }
 
 // Addressing mode functions
@@ -331,7 +355,7 @@ uint16_t CPU::AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory)
     // If the zero page is crossed
     if ((abs_address ^ sum) >> 8)
         machine_cycles--;
-    
+
     return sum;
 }
 
@@ -421,14 +445,12 @@ void CPU::OpTAY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     Y = A;
     machine_cycles--;
     SetFlagsZN(Y);
-
 }
 void CPU::OpTXA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     A = X;
     machine_cycles--;
     SetFlagsZN(A);
-
 }
 void CPU::OpTYA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
@@ -473,7 +495,7 @@ void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 
 void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    A &=ReadByte(machine_cycles, address, memory);
+    A &= ReadByte(machine_cycles, address, memory);
     SetFlagsZN(A);
 }
 

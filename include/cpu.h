@@ -1,16 +1,40 @@
+/*
+ * This file is part of the MOS6502 emulator.
+ * (https://github.com/ericwoude/MOS6502)
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright © 2021 Eric van der Woude
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the “Software”), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #ifndef CPU_H
 #define CPU_H
 
-#include "mem.h"
-
 #include <array>
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 #include <iostream>
+
+#include "mem.h"
 
 class CPU
 {
-    public:
+   public:
     CPU();
     void Reset(Mem& memory);
     uint32_t Execute(uint32_t machine_cycles, Mem& memory);
@@ -31,70 +55,18 @@ class CPU
             uint8_t I : 1;
             uint8_t D : 1;
             uint8_t B : 1;
-            uint8_t _ : 1; // Unused last bit
+            uint8_t _ : 1;  // Unused last bit
             uint8_t V : 1;
             uint8_t N : 1;
         };
     };
- 
-    // Opcodes
-    static constexpr uint8_t
-        LDA_IM = 0xA9,
-        LDA_ZP = 0xA5,
-        LDA_ZPX = 0xB5,
-        LDA_ABS = 0x6D,
-        LDA_ABSX = 0xBD,
-        LDA_ABSY = 0xB9,
-        LDA_INDX = 0xA1,
-        LDA_INDY = 0xB1,
 
-        LDX_IM = 0xA2,
-        LDX_ZP = 0xA6,
-        LDX_ZPY = 0xB6,
-        LDX_ABS = 0xAE,
-        LDX_ABSY = 0xBE,
-
-        LDY_IM = 0xA0,
-        LDY_ZP = 0xA4,
-        LDY_ZPX = 0xB4,
-        LDY_ABS = 0xAC,
-        LDY_ABSX = 0xBC,
-
-        STA_ZP = 0x85,
-        STA_ZPX = 0x95,
-        STA_ABS = 0x8D,
-        STA_ABSX = 0x9D,
-        STA_ABSY = 0x99,
-        STA_INDX = 0x81,
-        STA_INDY = 0x91,
-
-        STX_ZP = 0x86,
-        STX_ZPY = 0x96,
-        STX_ABS = 0x8E,
-
-        STY_ZP = 0x84,
-        STY_ZPX = 0x94,
-        STY_ABS = 0x8C,
-
-        TAX = 0xAA,
-        TAY = 0xA8,
-        TXA = 0x8A,
-        TYA = 0x98,
-
-        TSX = 0xBA,
-        TXS = 0x9A,
-        PHA = 0x48,
-        PHP = 0x08,
-        PLA = 0x68,
-        PLP = 0x28,
-
-        JPS_A = 0x20;
-
-    private:
+   private:
     using AddressExecution = uint16_t (CPU::*)(uint32_t&, Mem&);
     using OperationExecution = void (CPU::*)(uint32_t&, uint16_t, Mem&);
 
-    struct Instruction {
+    struct Instruction
+    {
         AddressExecution addr;
         OperationExecution op;
     };
@@ -103,8 +75,8 @@ class CPU
     void ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory);
 
     // Addressing mode functions
-    uint16_t AddrOpcode(uint32_t&, Mem& memory); // Used for debugging illegal opcodes
-    uint16_t AddrImplied(uint32_t&, Mem&); // Does not do anything
+    uint16_t AddrOpcode(uint32_t&, Mem& memory);  // Used for debugging illegal opcodes
+    uint16_t AddrImplied(uint32_t&, Mem&);        // Does not do anything
     uint16_t AddrImmediate(uint32_t&, Mem&);
     uint16_t AddrZeroPage(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrZeroPageX(uint32_t& machine_cycles, Mem& memory);
@@ -145,7 +117,7 @@ class CPU
     void OpSTA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpSTX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpSTY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
-    
+
     // REGISTER TRANSFERS
     void OpTAX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpTAY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
@@ -173,7 +145,6 @@ class CPU
     void OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
-
     // INCREMENTS & DECREMENTS OPERATIONS
     void OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpINX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
@@ -186,4 +157,4 @@ class CPU
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
 
-#endif // CPU_H
+#endif  // CPU_H

@@ -1,17 +1,41 @@
+/*
+ * This file is part of the MOS6502 emulator.
+ * (https://github.com/ericwoude/MOS6502)
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright © 2021 Eric van der Woude
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the “Software”), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #include <gtest/gtest.h>
 
 #include "cpu.h"
 
 class StoreTests : public ::testing::Test
 {
-    public:
+   public:
     Mem mem;
     CPU cpu;
 
-    protected:
+   protected:
     void SetUp() override
     {
-      cpu.Reset(mem);
+        cpu.Reset(mem);
     }
 
     // Tests for STAZeroPage, STXZeroPage, and STYZeroPage.
@@ -90,36 +114,36 @@ class StoreTests : public ::testing::Test
 
 TEST_F(StoreTests, STAZeroPage)
 {
-    TestSTZeroPage(CPU::STA_ZP, cpu.A);
+    TestSTZeroPage(0x85, cpu.A);
 }
 
 TEST_F(StoreTests, STAZeroPageX)
 {
-    TestSTZeroPageXY(CPU::STA_ZPX, cpu.A, cpu.X);
+    TestSTZeroPageXY(0x95, cpu.A, cpu.X);
 }
 
 TEST_F(StoreTests, STAAbsolute)
 {
-    TestSTAbsolute(CPU::STA_ABS, cpu.A);
+    TestSTAbsolute(0x8D, cpu.A);
 }
 
 TEST_F(StoreTests, STAAbsoluteX)
 {
-    TestSTAABsoluteXY(CPU::STA_ABSX, cpu.X);
+    TestSTAABsoluteXY(0x9D, cpu.X);
 }
 
 TEST_F(StoreTests, STAAbsoluteY)
 {
-    TestSTAABsoluteXY(CPU::STA_ABSY, cpu.Y);
+    TestSTAABsoluteXY(0x99, cpu.Y);
 }
 
-TEST_F(StoreTests, STAIndirectX) // with wrap
+TEST_F(StoreTests, STAIndirectX)  // with wrap
 {
     cpu.A = 0x09;
     cpu.X = 0x02;
 
     // INLINE PROGRAM
-    mem[0xFFFC] = CPU::STA_INDX;
+    mem[0xFFFC] = 0x81;
     mem[0xFFFD] = 0x05;
     mem[0x0007] = 0x0A;
     mem[0x0008] = 0x0A;
@@ -131,13 +155,13 @@ TEST_F(StoreTests, STAIndirectX) // with wrap
     EXPECT_EQ(cycles, used_cycles);
 }
 
-TEST_F(StoreTests, STAIndirectY) // with wrap
+TEST_F(StoreTests, STAIndirectY)  // with wrap
 {
     cpu.A = 0x09;
     cpu.Y = 0x02;
 
     // INLINE PROGRAM
-    mem[0xFFFC] = CPU::STA_INDY;
+    mem[0xFFFC] = 0x91;
     mem[0xFFFD] = 0x05;
     mem[0x0005] = 0x0A;
     mem[0x0006] = 0x0A;
@@ -153,33 +177,32 @@ TEST_F(StoreTests, STAIndirectY) // with wrap
 
 TEST_F(StoreTests, STXZeroPage)
 {
-    TestSTZeroPage(CPU::STX_ZP, cpu.X);
+    TestSTZeroPage(0x86, cpu.X);
 }
 
 TEST_F(StoreTests, STXZeroPageY)
 {
-    TestSTZeroPageXY(CPU::STX_ZPY, cpu.X, cpu.Y);
+    TestSTZeroPageXY(0x96, cpu.X, cpu.Y);
 }
 
 TEST_F(StoreTests, STXAbsolute)
 {
-    TestSTAbsolute(CPU::STX_ABS, cpu.X);
+    TestSTAbsolute(0x8E, cpu.X);
 }
-
 
 // Tests for STA instructions
 
 TEST_F(StoreTests, STYZeroPage)
 {
-    TestSTZeroPage(CPU::STY_ZP, cpu.Y);
+    TestSTZeroPage(0x84, cpu.Y);
 }
 
 TEST_F(StoreTests, STYZeroPageX)
 {
-    TestSTZeroPageXY(CPU::STY_ZPX, cpu.Y, cpu.X);
+    TestSTZeroPageXY(0x94, cpu.Y, cpu.X);
 }
 
 TEST_F(StoreTests, STYAbsolute)
 {
-    TestSTAbsolute(CPU::STY_ABS, cpu.Y);
+    TestSTAbsolute(0x8C, cpu.Y);
 }

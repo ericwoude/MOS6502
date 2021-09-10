@@ -1,14 +1,38 @@
+/*
+ * This file is part of the MOS6502 emulator.
+ * (https://github.com/ericwoude/MOS6502)
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright © 2021 Eric van der Woude
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the “Software”), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #include <gtest/gtest.h>
 
 #include "cpu.h"
 
 class ArithmeticTests : public ::testing::Test
 {
-    public:
+   public:
     Mem mem;
     CPU cpu;
 
-    protected:
+   protected:
     void SetUp() override
     {
         cpu.Reset(mem);
@@ -17,25 +41,18 @@ class ArithmeticTests : public ::testing::Test
     struct TestVariables
     {
         uint8_t A;
-        uint8_t M; // Memory content, will be added to A.
+        uint8_t M;  // Memory content, will be added to A.
         uint8_t result;
 
-        bool carry; // Do we have a carry bit
-        
-        bool C, Z, V, N; // Processor status
+        bool carry;  // Do we have a carry bit
+
+        bool C, Z, V, N;  // Processor status
     };
 
-    TestVariables standardTest =
-    {
-        standardTest.A = 13,
-        standardTest.M = 12,
-        standardTest.result = 26,
-        standardTest.carry = false,
-        standardTest.C = false,
-        standardTest.Z = false,
-        standardTest.V = false,
-        standardTest.N
-    };
+    TestVariables standardTest = {standardTest.A = 13,      standardTest.M = 12,
+                                  standardTest.result = 26, standardTest.carry = false,
+                                  standardTest.C = false,   standardTest.Z = false,
+                                  standardTest.V = false,   standardTest.N};
 
     void TestImmediate(uint8_t opcode, TestVariables test)
     {
@@ -160,29 +177,29 @@ TEST_F(ArithmeticTests, ADCCarry)
 TEST_F(ArithmeticTests, ADCOverflow)
 {
     TestVariables test;
-	test.carry = false;
-	test.A = 127;
-	test.M = 1;
-	test.result = 128;
-	test.C = false;
-	test.N = true;
-	test.V = true;
-	test.Z = false;
+    test.carry = false;
+    test.A = 127;
+    test.M = 1;
+    test.result = 128;
+    test.C = false;
+    test.N = true;
+    test.V = true;
+    test.Z = false;
 
-	TestImmediate(0x69, test);
+    TestImmediate(0x69, test);
 }
 
 TEST_F(ArithmeticTests, ADCOverflowCarry)
 {
     TestVariables test;
-	test.carry = true;
-	test.A = 127;
-	test.M = 1;
-	test.result = 129;
-	test.C = false;
-	test.N = true;
-	test.V = true;
-	test.Z = false;
+    test.carry = true;
+    test.A = 127;
+    test.M = 1;
+    test.result = 129;
+    test.C = false;
+    test.N = true;
+    test.V = true;
+    test.Z = false;
 
     TestImmediate(0x69, test);
 }
@@ -191,7 +208,7 @@ TEST_F(ArithmeticTests, ADCNegativeToPositive)
 {
     TestVariables test;
     test.A = 13;
-    test.M = (uint8_t) -3;
+    test.M = (uint8_t)-3;
     test.result = 11;
     test.carry = true;
     test.C = true;
@@ -219,7 +236,6 @@ TEST_F(ArithmeticTests, SBCZeroFromZero)
     TestImmediate(0xE9, test);
 }
 
-
 TEST_F(ArithmeticTests, SBCOneFromTwo)
 {
     TestVariables test;
@@ -240,7 +256,7 @@ TEST_F(ArithmeticTests, SBCOneFromZero)
     TestVariables test;
     test.A = 0;
     test.M = 1;
-    test.result = (uint8_t) -1;
+    test.result = (uint8_t)-1;
     test.carry = true;
     test.C = false;
     test.Z = false;
@@ -255,7 +271,7 @@ TEST_F(ArithmeticTests, SBCCarry)
     TestVariables test;
     test.A = 0;
     test.M = 1;
-    test.result = (uint8_t) -2;
+    test.result = (uint8_t)-2;
     test.carry = false;
     test.C = false;
     test.Z = false;
@@ -268,7 +284,7 @@ TEST_F(ArithmeticTests, SBCCarry)
 TEST_F(ArithmeticTests, SBCOverflow)
 {
     TestVariables test;
-    test.A = (uint8_t) -128;
+    test.A = (uint8_t)-128;
     test.M = 1;
     test.result = 127;
     test.carry = true;
@@ -284,7 +300,7 @@ TEST_F(ArithmeticTests, SBCOverflow2)
 {
     TestVariables test;
     test.A = 127;
-    test.M = (uint8_t) -1;
+    test.M = (uint8_t)-1;
     test.result = 128;
     test.carry = true;
     test.C = false;
