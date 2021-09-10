@@ -148,6 +148,9 @@ CPU::CPU()
     ADD_DISPATCH(0xD6, DEC, ZeroPageX);
     ADD_DISPATCH(0xCE, DEC, Absolute);
     ADD_DISPATCH(0xDE, DEC, AbsoluteX);
+    ADD_DISPATCH(0xCA, DEX, Implied);
+    ADD_DISPATCH(0x88, DEY, Implied);
+
 }
 
 void CPU::Reset(Mem& memory)
@@ -576,7 +579,19 @@ void CPU::OpDEC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(result);
 }
 
+void CPU::OpDEX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    X--;
+    machine_cycles--;
+    SetFlagsZN(X);
+}
 
+void CPU::OpDEY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    Y--;
+    machine_cycles--;
+    SetFlagsZN(Y);
+}
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {

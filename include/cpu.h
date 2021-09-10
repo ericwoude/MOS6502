@@ -180,8 +180,8 @@ class CPU
     void OpINY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpDEC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
-
-
+    void OpDEX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpDEY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };

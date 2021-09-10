@@ -60,7 +60,7 @@ class IncrementsDecrementsTest : public ::testing::Test
         cpu.Z = true;
         cpu.N = false;
 
-        reg = 0b10001000;
+        reg = 0b10001110;
 
         // INLINE PROGRAM
         mem[0xFFFC] = opcode;
@@ -68,7 +68,67 @@ class IncrementsDecrementsTest : public ::testing::Test
         const uint32_t cycles = 2;
         uint32_t used_cycles = cpu.Execute(cycles, mem);
 
-        EXPECT_EQ(reg, 0b10001001);
+        EXPECT_EQ(reg, 0b10001111);
+        EXPECT_EQ(cycles, used_cycles);
+
+        EXPECT_FALSE(cpu.Z);
+        EXPECT_TRUE(cpu.N);
+    }
+
+    void TestDecrementOne(uint8_t opcode, uint8_t& reg)
+    {
+        cpu.Z = true;
+        cpu.N = true;
+
+        reg = 1;
+
+        // INLINE PROGRAM
+        mem[0xFFFC] = opcode;
+
+        const uint32_t cycles = 2;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+        EXPECT_EQ(reg, 0);
+        EXPECT_EQ(cycles, used_cycles);
+
+        EXPECT_TRUE(cpu.Z);
+        EXPECT_FALSE(cpu.N);
+    }
+
+    void TestDecrementOverflow(uint8_t opcode, uint8_t& reg)
+    {
+        cpu.Z = true;
+        cpu.N = false;
+
+        reg = 0;
+
+        // INLINE PROGRAM
+        mem[0xFFFC] = opcode;
+
+        const uint32_t cycles = 2;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+        EXPECT_EQ(reg, 0xFF);
+        EXPECT_EQ(cycles, used_cycles);
+
+        EXPECT_FALSE(cpu.Z);
+        EXPECT_TRUE(cpu.N);
+    }
+
+    void TestDecrementNegative(uint8_t opcode, uint8_t& reg)
+    {
+        cpu.Z = true;
+        cpu.N = false;
+
+        reg = 0b10001111;
+
+        // INLINE PROGRAM
+        mem[0xFFFC] = opcode;
+
+        const uint32_t cycles = 2;
+        uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+        EXPECT_EQ(reg, 0b10001110);
         EXPECT_EQ(cycles, used_cycles);
 
         EXPECT_FALSE(cpu.Z);
@@ -190,4 +250,38 @@ TEST_F(IncrementsDecrementsTest, DECOverflow)
 
     EXPECT_FALSE(cpu.Z);
     EXPECT_TRUE(cpu.N);
+}
+
+// Tests for DEX
+
+TEST_F(IncrementsDecrementsTest, DEXOne)
+{
+    TestDecrementOne(0xCA, cpu.X);
+}
+
+TEST_F(IncrementsDecrementsTest, DEXOverflow)
+{
+    TestDecrementOverflow(0xCA, cpu.X);
+}
+
+TEST_F(IncrementsDecrementsTest, DEXNegative)
+{
+    TestDecrementNegative(0xCA, cpu.X);
+}
+
+// Tests for INY
+
+TEST_F(IncrementsDecrementsTest, DEYONE)
+{
+    TestDecrementOne(0x88, cpu.Y);
+}
+
+TEST_F(IncrementsDecrementsTest, DEYOverflow)
+{
+    TestDecrementOverflow(0x88, cpu.Y);
+}
+
+TEST_F(IncrementsDecrementsTest, DEYNegative)
+{
+    TestDecrementNegative(0x88, cpu.Y);
 }
