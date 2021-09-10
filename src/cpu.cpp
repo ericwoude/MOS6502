@@ -135,6 +135,16 @@ CPU::CPU()
     ADD_DISPATCH(0xC0, CPY, Immediate);
     ADD_DISPATCH(0xC4, CPY, ZeroPage);
     ADD_DISPATCH(0xCC, CPY, Absolute);
+
+    // INCREMENTS & DECREMENTS OPERATIONS
+    ADD_DISPATCH(0xE6, INC, ZeroPage);
+    ADD_DISPATCH(0xF6, INC, ZeroPageX);
+    ADD_DISPATCH(0xEE, INC, Absolute);
+    ADD_DISPATCH(0xFE, INC, AbsoluteX);
+
+    ADD_DISPATCH(0xE8, INX, Implied);
+
+    ADD_DISPATCH(0xC8, INY, Implied);
 }
 
 void CPU::Reset(Mem& memory)
@@ -530,6 +540,29 @@ void CPU::OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     Z = (Y == operand);
     N = ((Y - operand) & 0b10000000) > 0;
 }
+
+void CPU::OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t result = 1 + ReadByte(machine_cycles, address, memory);
+    StoreByte(machine_cycles, address, result, memory);
+    machine_cycles--;
+    LDSetFlags(result);
+}
+
+void CPU::OpINX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    X++;
+    machine_cycles--;
+    LDSetFlags(X);
+}
+
+void CPU::OpINY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    Y++;
+    machine_cycles--;
+    LDSetFlags(Y);
+}
+
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {

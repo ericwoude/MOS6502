@@ -173,6 +173,13 @@ class CPU
     void OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
+
+    // INCREMENTS & DECREMENTS OPERATIONS
+    void OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpINX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpINY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
 
