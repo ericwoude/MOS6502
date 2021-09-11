@@ -76,7 +76,8 @@ class CPU
 
     // Addressing mode functions
     uint16_t AddrOpcode(uint32_t&, Mem& memory);  // Used for debugging illegal opcodes
-    uint16_t AddrImplied(uint32_t&, Mem&);        // Does not do anything
+    uint16_t AddrAccumulator(uint32_t&, Mem&);
+    uint16_t AddrImplied(uint32_t&, Mem&);  // Does not do anything
     uint16_t AddrImmediate(uint32_t&, Mem&);
     uint16_t AddrZeroPage(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrZeroPageX(uint32_t& machine_cycles, Mem& memory);
@@ -145,7 +146,7 @@ class CPU
     void OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
-    // INCREMENTS & DECREMENTS OPERATIONS
+    // INCREMENT & DECREMENT OPERATIONS
     void OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpINX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpINY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
@@ -153,6 +154,16 @@ class CPU
     void OpDEC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpDEX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpDEY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+    // SHIFT OPERATIONS
+    void OpASLA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpASL(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpLSRA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpLSR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpROLA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpROL(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpRORA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
