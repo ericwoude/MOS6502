@@ -266,3 +266,263 @@ TEST_F(ShiftsTests, LSRCarry)
     EXPECT_TRUE(cpu.Z);
     EXPECT_FALSE(cpu.N);
 }
+
+// Tests for ROL Accumulator
+
+TEST_F(ShiftsTests, ROLAccumulatorZero)
+{
+    cpu.A = 0;
+
+    cpu.C = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x2A;
+
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(ShiftsTests, ROLAccumulatorOne)
+{
+    cpu.A = 0b00000001;
+
+    cpu.C = true;
+    cpu.Z = false;
+    cpu.N = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x2A;
+
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0b00000011);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(ShiftsTests, ROLAccumulatorNegative)
+{
+    cpu.A = 0b10000001;
+
+    cpu.C = false;
+    cpu.Z = false;
+    cpu.N = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x2A;
+
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0b000000010);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_TRUE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+// Tests for ROL
+
+TEST_F(ShiftsTests, ROLZero)
+{
+    cpu.C = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x26;
+    mem[0xFFFD] = 0x20;
+    mem[0x0020] = 0;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0020], 0);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(ShiftsTests, ROLOne)
+{
+    cpu.C = true;
+    cpu.Z = false;
+    cpu.N = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x26;
+    mem[0xFFFD] = 0x20;
+    mem[0x0020] = 0b00000001;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0020], 0b00000011);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(ShiftsTests, ROLNegative)
+{
+    cpu.C = false;
+    cpu.Z = false;
+    cpu.N = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x26;
+    mem[0xFFFD] = 0x20;
+    mem[0x0020] = 0b10000001;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0020], 0b00000010);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_TRUE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+// Tests for ROL Accumulator
+
+TEST_F(ShiftsTests, RORAccumulatorZero)
+{
+    cpu.A = 0;
+
+    cpu.C = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x6A;
+
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(ShiftsTests, RORAccumulatorOne)
+{
+    cpu.A = 0b00000001;
+
+    cpu.C = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x6A;
+
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0b10000000);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_TRUE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_TRUE(cpu.N);
+}
+
+TEST_F(ShiftsTests, RORAccumulatorNegative)
+{
+    cpu.A = 0b10000001;
+
+    cpu.C = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x6A;
+
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0b01000000);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_TRUE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+// Tests for ROR
+
+TEST_F(ShiftsTests, RORZero)
+{
+    cpu.C = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x66;
+    mem[0xFFFD] = 0x20;
+    mem[0x0020] = 0;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0020], 0);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(ShiftsTests, ROROne)
+{
+    cpu.C = true;
+    cpu.Z = false;
+    cpu.N = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x66;
+    mem[0xFFFD] = 0x20;
+    mem[0x0020] = 0b00000001;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0020], 0b10000000);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_TRUE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_TRUE(cpu.N);
+}
+
+TEST_F(ShiftsTests, RORNegative)
+{
+    cpu.C = false;
+    cpu.Z = false;
+    cpu.N = false;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x66;
+    mem[0xFFFD] = 0x20;
+    mem[0x0020] = 0b10000001;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0020], 0b01000000);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_TRUE(cpu.C);
+    EXPECT_FALSE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}

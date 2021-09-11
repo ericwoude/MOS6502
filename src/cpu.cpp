@@ -159,7 +159,7 @@ CPU::CPU()
     ADD_DISPATCH(0xC4, CPY, ZeroPage);
     ADD_DISPATCH(0xCC, CPY, Absolute);
 
-    // INCREMENTS & DECREMENTS OPERATIONS
+    // INCREMENT & DECREMENT OPERATIONS
     ADD_DISPATCH(0xE6, INC, ZeroPage);
     ADD_DISPATCH(0xF6, INC, ZeroPageX);
     ADD_DISPATCH(0xEE, INC, Absolute);
@@ -174,7 +174,7 @@ CPU::CPU()
     ADD_DISPATCH(0xCA, DEX, Implied);
     ADD_DISPATCH(0x88, DEY, Implied);
 
-    // SHIFTS OPERATIONS
+    // SHIFT OPERATIONS
     ADD_DISPATCH(0x0A, ASLA, Accumulator);
     ADD_DISPATCH(0x06, ASL, ZeroPage);
     ADD_DISPATCH(0x16, ASL, ZeroPageX);
@@ -186,6 +186,18 @@ CPU::CPU()
     ADD_DISPATCH(0x56, LSR, ZeroPageX);
     ADD_DISPATCH(0x4E, LSR, Absolute);
     ADD_DISPATCH(0x5E, LSR, AbsoluteX);
+
+    ADD_DISPATCH(0x2A, ROLA, Accumulator);
+    ADD_DISPATCH(0x26, ROL, ZeroPage);
+    ADD_DISPATCH(0x36, ROL, ZeroPageX);
+    ADD_DISPATCH(0x2E, ROL, Absolute);
+    ADD_DISPATCH(0x3E, ROL, AbsoluteX);
+
+    ADD_DISPATCH(0x6A, RORA, Accumulator);
+    ADD_DISPATCH(0x66, ROR, ZeroPage);
+    ADD_DISPATCH(0x76, ROR, ZeroPageX);
+    ADD_DISPATCH(0x6E, ROR, Absolute);
+    ADD_DISPATCH(0x7E, ROR, AbsoluteX);
 }
 
 void CPU::Reset(Mem& memory)
@@ -669,6 +681,60 @@ void CPU::OpLSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     machine_cycles--;
     StoreByte(machine_cycles, address, operand, memory);
     SetFlagsZN(operand);
+}
+
+void CPU::OpROLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    const uint8_t operand = A;
+    A <<= 1;
+    machine_cycles--;
+
+    if (C)
+        A |= 0b00000001;
+
+    C = (operand & 0b10000000) > 0;
+    SetFlagsZN(A);
+}
+
+void CPU::OpROL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    const uint8_t operand = ReadByte(machine_cycles, address, memory);
+    uint8_t result = operand << 1;
+    machine_cycles--;
+
+    if (C)
+        result |= 0b00000001;
+
+    StoreByte(machine_cycles, address, result, memory);
+    C = (operand & 0b10000000) > 0;
+    SetFlagsZN(result);
+}
+
+void CPU::OpRORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    const uint8_t operand = A;
+    A >>= 1;
+    machine_cycles--;
+
+    if (C)
+        A |= 0b10000000;
+
+    C = (operand & 0b00000001) > 0;
+    SetFlagsZN(A);
+}
+
+void CPU::OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    const uint8_t operand = ReadByte(machine_cycles, address, memory);
+    uint8_t result = operand >> 1;
+    machine_cycles--;
+
+    if (C)
+        result |= 0b10000000;
+
+    StoreByte(machine_cycles, address, result, memory);
+    C = (operand & 0b00000001) > 0;
+    SetFlagsZN(result);
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
