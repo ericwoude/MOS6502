@@ -76,6 +76,7 @@ class CPU
 
     // Addressing mode functions
     uint16_t AddrOpcode(uint32_t&, Mem& memory);  // Used for debugging illegal opcodes
+    uint16_t AddrAccumulator(uint32_t&, Mem&);
     uint16_t AddrImplied(uint32_t&, Mem&);        // Does not do anything
     uint16_t AddrImmediate(uint32_t&, Mem&);
     uint16_t AddrZeroPage(uint32_t& machine_cycles, Mem& memory);
@@ -153,6 +154,10 @@ class CPU
     void OpDEC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpDEX(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpDEY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+    // SHIFTS OPERATIONS
+    void OpASL_A(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpASL(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
