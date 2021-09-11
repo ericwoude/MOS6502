@@ -133,7 +133,6 @@ TEST_F(ShiftsTests, ASLZero)
 
 TEST_F(ShiftsTests, ASLOne)
 {
-
     cpu.C = true;
     cpu.Z = true;
     cpu.N = true;
@@ -174,4 +173,96 @@ TEST_F(ShiftsTests, ASLCarry)
     EXPECT_TRUE(cpu.C);
     EXPECT_FALSE(cpu.Z);
     EXPECT_TRUE(cpu.N);
+}
+
+// Tests for LSR Accumulator
+
+TEST_F(ShiftsTests, LSRAccumulatorZero)
+{
+    cpu.A = 0;
+
+    cpu.C = true;
+    cpu.Z = false;
+    cpu.N = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x4A;
+
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(ShiftsTests, LSRAccumulatorCarry)
+{
+    cpu.A = 1;
+
+    cpu.C = false;
+    cpu.Z = false;
+    cpu.N = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x4A;
+
+    const uint32_t cycles = 2;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.A, 0);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_TRUE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+// Tests for LSR
+
+TEST_F(ShiftsTests, LSRZero)
+{
+    cpu.C = true;
+    cpu.Z = false;
+    cpu.N = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x46;
+    mem[0xFFFD] = 0x22;
+    mem[0x0022] = 0;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0022], 0);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_FALSE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
+}
+
+TEST_F(ShiftsTests, LSRCarry)
+{
+    cpu.C = false;
+    cpu.Z = false;
+    cpu.N = true;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x46;
+    mem[0xFFFD] = 0x22;
+    mem[0x0022] = 1;
+
+    const uint32_t cycles = 5;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x0022], 0);
+    EXPECT_EQ(cycles, used_cycles);
+
+    EXPECT_TRUE(cpu.C);
+    EXPECT_TRUE(cpu.Z);
+    EXPECT_FALSE(cpu.N);
 }

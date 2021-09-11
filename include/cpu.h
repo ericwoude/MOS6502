@@ -156,8 +156,10 @@ class CPU
     void OpDEY(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     // SHIFTS OPERATIONS
-    void OpASL_A(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpASLA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpASL(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpLSRA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpLSR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };

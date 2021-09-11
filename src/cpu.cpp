@@ -175,11 +175,17 @@ CPU::CPU()
     ADD_DISPATCH(0x88, DEY, Implied);
 
     // SHIFTS OPERATIONS
-    ADD_DISPATCH(0x0A, ASL_A, Accumulator);
+    ADD_DISPATCH(0x0A, ASLA, Accumulator);
     ADD_DISPATCH(0x06, ASL, ZeroPage);
     ADD_DISPATCH(0x16, ASL, ZeroPageX);
     ADD_DISPATCH(0x0E, ASL, Absolute);
     ADD_DISPATCH(0x1E, ASL, AbsoluteX);
+
+    ADD_DISPATCH(0x4A, LSRA, Accumulator);
+    ADD_DISPATCH(0x46, LSR, ZeroPage);
+    ADD_DISPATCH(0x56, LSR, ZeroPageX);
+    ADD_DISPATCH(0x4E, LSR, Absolute);
+    ADD_DISPATCH(0x5E, LSR, AbsoluteX);
 }
 
 void CPU::Reset(Mem& memory)
@@ -627,7 +633,7 @@ void CPU::OpDEY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(Y);
 }
 
-void CPU::OpASL_A(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpASLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     C = (A & 0b10000000) > 0;
     A <<= 1;
@@ -641,6 +647,25 @@ void CPU::OpASL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     C = (operand & 0b10000000) > 0;
 
     operand <<= 1;
+    machine_cycles--;
+    StoreByte(machine_cycles, address, operand, memory);
+    SetFlagsZN(operand);
+}
+
+void CPU::OpLSRA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    C = (A & 0b00000001);
+    A >>= 1;
+    machine_cycles--;
+    SetFlagsZN(A);
+}
+
+void CPU::OpLSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    C = (operand & 0b00000001);
+
+    operand >>= 1;
     machine_cycles--;
     StoreByte(machine_cycles, address, operand, memory);
     SetFlagsZN(operand);
