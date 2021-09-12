@@ -87,6 +87,7 @@ class CPU
     uint16_t AddrAbsoluteX5(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrIndirect(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory);
@@ -164,6 +165,9 @@ class CPU
     void OpROL(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpRORA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+    // JUMPS & CALLS OPERATIONS
+    void OpJMP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };

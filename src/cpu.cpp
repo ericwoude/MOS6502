@@ -198,6 +198,10 @@ CPU::CPU()
     ADD_DISPATCH(0x76, ROR, ZeroPageX);
     ADD_DISPATCH(0x6E, ROR, Absolute);
     ADD_DISPATCH(0x7E, ROR, AbsoluteX);
+
+    // JUMPS & CALLS OPERATIONS
+    ADD_DISPATCH(0x4C, JMP, Absolute);
+    ADD_DISPATCH(0x6C, JMP, Indirect);
 }
 
 void CPU::Reset(Mem& memory)
@@ -396,6 +400,21 @@ uint16_t CPU::AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory)
     machine_cycles--;
 
     return sum;
+}
+
+// The indirect addressing mode is designed to reproduce a original
+// bug of the 6502 where a jumping to a vector starting at the last
+// byte of the page will use the high byte of the last byte in the
+// page and the low byte of the first byte in the page.
+uint16_t CPU::AddrIndirect(uint32_t& machine_cycles, Mem& memory)
+{
+    uint8_t l = FetchByte(machine_cycles, memory);
+    uint8_t h = FetchByte(machine_cycles, memory);
+
+    uint8_t a = ReadByte(machine_cycles, (uint16_t)(h << 8) | l, memory);
+    uint8_t b = ReadByte(machine_cycles, (uint16_t)(h << 8) | ((l + 1) & 0xFF), memory);
+
+    return (uint16_t)(b << 8) | a;
 }
 
 uint16_t CPU::AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory)
@@ -735,6 +754,12 @@ void CPU::OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     StoreByte(machine_cycles, address, result, memory);
     C = (operand & 0b00000001) > 0;
     SetFlagsZN(result);
+}
+
+// Implement the bug the 6502 has with jumping.
+void CPU::OpJMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    PC = address;
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
