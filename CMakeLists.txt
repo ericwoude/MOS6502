@@ -38,6 +38,7 @@ add_executable(
     tests/arithmetic_tests.cpp
     tests/increments_decrements_tests.cpp
     tests/shifts_tests.cpp
+    tests/jumps_calls_tests.cpp
 )
 
 target_link_libraries(

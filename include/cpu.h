@@ -87,6 +87,7 @@ class CPU
     uint16_t AddrAbsoluteX5(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrIndirect(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory);
@@ -104,11 +105,13 @@ class CPU
     void StoreByte(uint32_t& machine_cycles, uint16_t address, uint8_t value, Mem& memory);
 
     uint16_t ReadWord(uint32_t& machine_cycles, uint16_t address, Mem& memory);
-    // void StoreWord(uint32_t& machine_cycles, uint16_t address, uint16_t value, Mem& memory);
+    void StoreWord(uint32_t& machine_cycles, uint16_t address, uint16_t value, Mem& memory);
 
     // Stack operations
-    void PushToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory);
-    uint8_t PullFromStack(uint32_t& machine_cycles, Mem& memory);
+    void PushByteToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory);
+    void PushWordToStack(uint32_t& machine_cycles, uint16_t value, Mem& memory);
+    uint8_t PullByteFromStack(uint32_t& machine_cycles, Mem& memory);
+    uint16_t PullWordFromStack(uint32_t& machine_cycles, Mem& memory);
 
     // Operation functions
     // LOAD & STORE
@@ -164,6 +167,11 @@ class CPU
     void OpROL(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpRORA(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+    // JUMPS & CALLS OPERATIONS
+    void OpJMP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpJSR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpRTS(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };

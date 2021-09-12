@@ -198,6 +198,12 @@ CPU::CPU()
     ADD_DISPATCH(0x76, ROR, ZeroPageX);
     ADD_DISPATCH(0x6E, ROR, Absolute);
     ADD_DISPATCH(0x7E, ROR, AbsoluteX);
+
+    // JUMPS & CALLS OPERATIONS
+    ADD_DISPATCH(0x4C, JMP, Absolute);
+    ADD_DISPATCH(0x6C, JMP, Indirect);
+    ADD_DISPATCH(0x20, JSR, Absolute);
+    ADD_DISPATCH(0x60, RTS, Implied);
 }
 
 void CPU::Reset(Mem& memory)
@@ -262,18 +268,40 @@ uint16_t CPU::ReadWord(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     return (h << 8) | l;
 }
 
-void CPU::PushToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory)
+void CPU::StoreWord(uint32_t& machine_cycles, uint16_t address, uint16_t value, Mem& memory)
+{
+    memory[address] = (uint8_t)value << 8;
+    memory[address + 1] = (uint8_t)value >> 8;
+    machine_cycles -= 2;
+}
+
+void CPU::PushByteToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory)
 {
     StoreByte(machine_cycles, 0x100 + SP--, value, memory);
     machine_cycles--;
 }
 
-uint8_t CPU::PullFromStack(uint32_t& machine_cycles, Mem& memory)
+void CPU::PushWordToStack(uint32_t& machine_cycles, uint16_t value, Mem& memory)
+{
+    StoreByte(machine_cycles, 0x100 + SP--, value >> 8, memory);
+    StoreByte(machine_cycles, 0x100 + SP--, value & 0xFF, memory);
+}
+
+uint8_t CPU::PullByteFromStack(uint32_t& machine_cycles, Mem& memory)
 {
     SP++;
-    machine_cycles -= 2;  // Why does this consume three cycles (four total)?
-
+    machine_cycles -= 1;
     return ReadByte(machine_cycles, 0x100 + SP, memory);
+}
+
+uint16_t CPU::PullWordFromStack(uint32_t& machine_cycles, Mem& memory)
+{
+    uint8_t l = PullByteFromStack(machine_cycles, memory);
+    uint8_t h = PullByteFromStack(machine_cycles, memory);
+
+    uint16_t result = (h << 8) | l;
+
+    return result;
 }
 
 // Instruction specific functions
@@ -398,6 +426,21 @@ uint16_t CPU::AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory)
     return sum;
 }
 
+// The indirect addressing mode is designed to reproduce a original
+// bug of the 6502 where a jumping to a vector starting at the last
+// byte of the page will use the high byte of the last byte in the
+// page and the low byte of the first byte in the page.
+uint16_t CPU::AddrIndirect(uint32_t& machine_cycles, Mem& memory)
+{
+    uint8_t l = FetchByte(machine_cycles, memory);
+    uint8_t h = FetchByte(machine_cycles, memory);
+
+    uint8_t a = ReadByte(machine_cycles, (uint16_t)(h << 8) | l, memory);
+    uint8_t b = ReadByte(machine_cycles, (uint16_t)(h << 8) | ((l + 1) & 0xFF), memory);
+
+    return (uint16_t)(b << 8) | a;
+}
+
 uint16_t CPU::AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory)
 {
     uint16_t address = FetchByte(machine_cycles, memory);
@@ -504,23 +547,25 @@ void CPU::OpTXS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 
 void CPU::OpPHA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    PushToStack(machine_cycles, A, memory);
+    PushByteToStack(machine_cycles, A, memory);
 }
 
 void CPU::OpPHP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    PushToStack(machine_cycles, PS, memory);
+    PushByteToStack(machine_cycles, PS, memory);
 }
 
 void CPU::OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    A = PullFromStack(machine_cycles, memory);
+    A = PullByteFromStack(machine_cycles, memory);
+    machine_cycles--;
     SetFlagsZN(A);
 }
 
 void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
-    PS = PullFromStack(machine_cycles, memory);
+    PS = PullByteFromStack(machine_cycles, memory);
+    machine_cycles--;
 }
 
 void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
@@ -735,6 +780,25 @@ void CPU::OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     StoreByte(machine_cycles, address, result, memory);
     C = (operand & 0b00000001) > 0;
     SetFlagsZN(result);
+}
+
+// Implements the bug the 6502 has with jumping in the indirect addressing function.
+void CPU::OpJMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    PC = address;
+}
+
+void CPU::OpJSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    PushWordToStack(machine_cycles, PC - 1, memory);
+    PC = address;
+    machine_cycles--;
+}
+
+void CPU::OpRTS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    PC = PullWordFromStack(machine_cycles, memory);
+    machine_cycles--;
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
