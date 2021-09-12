@@ -51,6 +51,7 @@ TEST_F(JumpsCallsTests, JMPAbsolute)
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.PC, 0x2020);
+    EXPECT_EQ(used_cycles, cycles);
 }
 
 TEST_F(JumpsCallsTests, JMPIndirect)
@@ -65,6 +66,7 @@ TEST_F(JumpsCallsTests, JMPIndirect)
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.PC, 0x2222);
+    EXPECT_EQ(used_cycles, cycles);
 }
 
 TEST_F(JumpsCallsTests, JMPIndirectOriginalBug)
@@ -81,5 +83,60 @@ TEST_F(JumpsCallsTests, JMPIndirectOriginalBug)
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.PC, 0x4080);
-    // EXPECT_NE(cpu.PC, 0x2222);
+    EXPECT_EQ(used_cycles, cycles);
+}
+
+// TEST FOR JSR
+
+TEST_F(JumpsCallsTests, JSR)
+{
+    mem[0xFFFC] = 0x20;
+    mem[0xFFFD] = 0x08;
+    mem[0xFFFE] = 0x80;
+    mem[0x8008] = 0x90;
+
+    const uint32_t cycles = 6;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(mem[0x100 + cpu.SP + 1], 0xFE);
+    EXPECT_EQ(mem[0x100 + cpu.SP + 2], 0xFF);
+    EXPECT_EQ(used_cycles, cycles);
+}
+
+// TEST FOR RTS
+
+TEST_F(JumpsCallsTests, RTS)
+{
+    // Put program counter 0x3035 into the stack
+    cpu.SP -= 2;
+    mem[0x100 + cpu.SP + 1] = 0x35;
+    mem[0x100 + cpu.SP + 2] = 0x30;
+
+    mem[0xFFFC] = 0x60;
+
+    const uint32_t cycles = 6;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.PC, 0x3035);
+    EXPECT_EQ(used_cycles, cycles);
+}
+
+// Testing JSR -> operation -> RTS
+
+TEST_F(JumpsCallsTests, JSRAndRTS)
+{
+    cpu.X = 2;
+
+    mem[0xFFFC] = 0x20;  // JSR
+    mem[0xFFFD] = 0x05;
+    mem[0xFFFE] = 0x03;
+    mem[0x0305] = 0xE8;  // Increment cpu.X
+    mem[0x0306] = 0x60;  // RTS
+
+    const uint32_t cycles = 6 + 2 + 6;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    EXPECT_EQ(cpu.X, 2 + 1);
+    EXPECT_EQ(cpu.PC, 0xFFFE);
+    EXPECT_EQ(used_cycles, cycles);
 }
