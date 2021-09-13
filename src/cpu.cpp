@@ -204,6 +204,16 @@ CPU::CPU()
     ADD_DISPATCH(0x6C, JMP, Indirect);
     ADD_DISPATCH(0x20, JSR, Absolute);
     ADD_DISPATCH(0x60, RTS, Implied);
+
+    // BRANCH OPERATIONS
+    ADD_DISPATCH(0x90, BCC, Relative);
+    ADD_DISPATCH(0xB0, BCS, Relative);
+    ADD_DISPATCH(0xF0, BEQ, Relative);
+    ADD_DISPATCH(0x30, BMI, Relative);
+    ADD_DISPATCH(0xD0, BNE, Relative);
+    ADD_DISPATCH(0x10, BPL, Relative);
+    ADD_DISPATCH(0x50, BVC, Relative);
+    ADD_DISPATCH(0x70, BVS, Relative);
 }
 
 void CPU::Reset(Mem& memory)
@@ -309,6 +319,20 @@ void CPU::SetFlagsZN(uint8_t reg)
 {
     Z = (reg == 0);
     N = (reg & 0b10000000) > 0;
+}
+
+void CPU::ConditionalBranch(bool flag, bool status, uint32_t& machine_cycles, uint16_t address)
+{
+    int8_t relative_address = (int8_t)address;
+    if (flag == status)
+    {
+        // If the branching crosses a page boundary, consume an extra cycle.
+        if ((PC >> 8) != ((PC + relative_address) >> 8))
+            machine_cycles--;
+
+        PC += relative_address;
+        machine_cycles--;
+    }
 }
 
 void CPU::ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
@@ -471,6 +495,11 @@ uint16_t CPU::AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory)
     machine_cycles--;
 
     return targetY;
+}
+
+uint16_t CPU::AddrRelative(uint32_t& machine_cycles, Mem& memory)
+{
+    return FetchByte(machine_cycles, memory);
 }
 
 // Instruction functions
@@ -799,6 +828,46 @@ void CPU::OpRTS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     PC = PullWordFromStack(machine_cycles, memory);
     machine_cycles--;
+}
+
+void CPU::OpBCC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    ConditionalBranch(C, false, machine_cycles, address);
+}
+
+void CPU::OpBCS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    ConditionalBranch(C, true, machine_cycles, address);
+}
+
+void CPU::OpBEQ(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    ConditionalBranch(Z, true, machine_cycles, address);
+}
+
+void CPU::OpBMI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    ConditionalBranch(N, true, machine_cycles, address);
+}
+
+void CPU::OpBNE(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    ConditionalBranch(Z, false, machine_cycles, address);
+}
+
+void CPU::OpBPL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    ConditionalBranch(N, false, machine_cycles, address);
+}
+
+void CPU::OpBVC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    ConditionalBranch(V, false, machine_cycles, address);
+}
+
+void CPU::OpBVS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    ConditionalBranch(V, true, machine_cycles, address);
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)

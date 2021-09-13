@@ -91,16 +91,20 @@ class CPU
     uint16_t AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory);
     uint16_t AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrRelative(uint32_t& machine_cycles, Mem& memory);
 
-    // Sets the Z, N flag for the LDA, LDX and LDY instructions.
+    // Sets the Z, N flag for the LDA, LDX and LDY instructions
     void SetFlagsZN(uint8_t reg);
 
-    // Fetch a single byte from memory offsetted by the PC.
+    // Used for all branching instructions
+    void ConditionalBranch(bool flag, bool status, uint32_t& machine_cycles, uint16_t address);
+
+    // Fetch a single byte from memory offsetted by the PC
     uint8_t FetchByte(uint32_t& machine_cycles, Mem& memory);
     uint16_t FetchWord(uint32_t& machine_cycles, Mem& memory);
 
     // Like FetchByte, except it fetches using an address and it does not
-    // increment the program counter.
+    // increment the program counter
     uint8_t ReadByte(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void StoreByte(uint32_t& machine_cycles, uint16_t address, uint8_t value, Mem& memory);
 
@@ -172,6 +176,16 @@ class CPU
     void OpJMP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpJSR(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpRTS(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+    // BRANCH OPERATIONS
+    void OpBCC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpBCS(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpBEQ(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpBMI(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpBNE(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpBPL(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpBVC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpBVS(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
