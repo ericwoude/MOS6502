@@ -14,8 +14,8 @@ WIP
 - Increment & decrement operations
 - Shift operations
 - Jump & call operations
+- Branch operations
 
 ## Instruction groups yet to implement
-- Branch operations
 - Status flag operations
 - System operations
