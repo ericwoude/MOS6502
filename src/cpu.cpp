@@ -344,7 +344,7 @@ void CPU::ConditionalBranch(bool flag, bool status, uint16_t address)
 void CPU::ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
 {
     uint16_t address = (this->*instruction.addr)(memory);
-    (this->*instruction.op)(machine_cycles, address, memory);
+    (this->*instruction.op)(address, memory);
 
     machine_cycles -= instruction.cycles;
 
@@ -514,111 +514,111 @@ uint16_t CPU::AddrRelative(Mem& memory)
 }
 
 // Instruction functions
-void CPU::OpLDA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLDA(uint16_t address, Mem& memory)
 {
     A = ReadByte(address, memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpLDX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLDX(uint16_t address, Mem& memory)
 {
     X = ReadByte(address, memory);
     SetFlagsZN(X);
 }
 
-void CPU::OpLDY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLDY(uint16_t address, Mem& memory)
 {
     Y = ReadByte(address, memory);
     SetFlagsZN(Y);
 }
 
-void CPU::OpSTA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSTA(uint16_t address, Mem& memory)
 {
     StoreByte(address, A, memory);
 }
 
-void CPU::OpSTX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSTX(uint16_t address, Mem& memory)
 {
     StoreByte(address, X, memory);
 }
 
-void CPU::OpSTY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSTY(uint16_t address, Mem& memory)
 {
     StoreByte(address, Y, memory);
 }
 
-void CPU::OpTAX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTAX(uint16_t address, Mem& memory)
 {
     X = A;
     SetFlagsZN(X);
 }
-void CPU::OpTAY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTAY(uint16_t address, Mem& memory)
 {
     Y = A;
     SetFlagsZN(Y);
 }
-void CPU::OpTXA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTXA(uint16_t address, Mem& memory)
 {
     A = X;
     SetFlagsZN(A);
 }
-void CPU::OpTYA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTYA(uint16_t address, Mem& memory)
 {
     A = Y;
     SetFlagsZN(A);
 }
 
-void CPU::OpTSX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTSX(uint16_t address, Mem& memory)
 {
     X = SP;
     SetFlagsZN(X);
 }
 
-void CPU::OpTXS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTXS(uint16_t address, Mem& memory)
 {
     SP = X;
 }
 
-void CPU::OpPHA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpPHA(uint16_t address, Mem& memory)
 {
     PushByteToStack(A, memory);
 }
 
-void CPU::OpPHP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpPHP(uint16_t address, Mem& memory)
 {
     PushByteToStack(PS, memory);
 }
 
-void CPU::OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpPLA(uint16_t address, Mem& memory)
 {
     A = PullByteFromStack(memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpPLP(uint16_t address, Mem& memory)
 {
     PS = PullByteFromStack(memory);
 }
 
-void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpAND(uint16_t address, Mem& memory)
 {
     A &= ReadByte(address, memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpEOR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpEOR(uint16_t address, Mem& memory)
 {
     A ^= ReadByte(address, memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpORA(uint16_t address, Mem& memory)
 {
     A |= ReadByte(address, memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpBIT(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBIT(uint16_t address, Mem& memory)
 {
     uint8_t result = ReadByte(address, memory) & A;
 
@@ -627,7 +627,7 @@ void CPU::OpBIT(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     N = (result & 0b1000000) > 0;
 }
 
-void CPU::OpADC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpADC(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
     const bool sign_bits_match = !(operand & 0b10000000) ^ (A & 0b10000000);
@@ -645,14 +645,14 @@ void CPU::OpADC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     C = (sum > 0xFF);
 }
 
-void CPU::OpSBC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSBC(uint16_t address, Mem& memory)
 {
     // Subtraction is the same as addition with the negated operand.
     memory[address] = ~memory[address];
-    OpADC(machine_cycles, address, memory);
+    OpADC(address, memory);
 }
 
-void CPU::OpCMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCMP(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
     C = (A >= operand);
@@ -660,7 +660,7 @@ void CPU::OpCMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     N = ((A - operand) & 0b10000000) > 0;
 }
 
-void CPU::OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCPX(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
     C = (X >= operand);
@@ -668,7 +668,7 @@ void CPU::OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     N = ((X - operand) & 0b10000000) > 0;
 }
 
-void CPU::OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCPY(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
     C = (Y >= operand);
@@ -676,7 +676,7 @@ void CPU::OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     N = ((Y - operand) & 0b10000000) > 0;
 }
 
-void CPU::OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpINC(uint16_t address, Mem& memory)
 {
     uint8_t result = ReadByte(address, memory);
     result++;
@@ -684,20 +684,20 @@ void CPU::OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(result);
 }
 
-void CPU::OpINX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpINX(uint16_t address, Mem& memory)
 {
     X++;
     SetFlagsZN(X);
 }
 
-void CPU::OpINY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpINY(uint16_t address, Mem& memory)
 {
     Y++;
 
     SetFlagsZN(Y);
 }
 
-void CPU::OpDEC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpDEC(uint16_t address, Mem& memory)
 {
     uint8_t result = ReadByte(address, memory);
     result--;
@@ -705,26 +705,26 @@ void CPU::OpDEC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(result);
 }
 
-void CPU::OpDEX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpDEX(uint16_t address, Mem& memory)
 {
     X--;
     SetFlagsZN(X);
 }
 
-void CPU::OpDEY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpDEY(uint16_t address, Mem& memory)
 {
     Y--;
     SetFlagsZN(Y);
 }
 
-void CPU::OpASLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpASLA(uint16_t address, Mem& memory)
 {
     C = (A & 0b10000000) > 0;
     A <<= 1;
     SetFlagsZN(A);
 }
 
-void CPU::OpASL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpASL(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
     C = (operand & 0b10000000) > 0;
@@ -734,14 +734,14 @@ void CPU::OpASL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(operand);
 }
 
-void CPU::OpLSRA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLSRA(uint16_t address, Mem& memory)
 {
     C = (A & 0b00000001);
     A >>= 1;
     SetFlagsZN(A);
 }
 
-void CPU::OpLSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLSR(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
     C = (operand & 0b00000001);
@@ -751,7 +751,7 @@ void CPU::OpLSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(operand);
 }
 
-void CPU::OpROLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpROLA(uint16_t address, Mem& memory)
 {
     const uint8_t operand = A;
     A <<= 1;
@@ -763,7 +763,7 @@ void CPU::OpROLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(A);
 }
 
-void CPU::OpROL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpROL(uint16_t address, Mem& memory)
 {
     const uint8_t operand = ReadByte(address, memory);
     uint8_t result = operand << 1;
@@ -776,7 +776,7 @@ void CPU::OpROL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(result);
 }
 
-void CPU::OpRORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpRORA(uint16_t address, Mem& memory)
 {
     const uint8_t operand = A;
     A >>= 1;
@@ -788,7 +788,7 @@ void CPU::OpRORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(A);
 }
 
-void CPU::OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpROR(uint16_t address, Mem& memory)
 {
     const uint8_t operand = ReadByte(address, memory);
     uint8_t result = operand >> 1;
@@ -802,98 +802,98 @@ void CPU::OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 }
 
 // Implements the bug the 6502 has with jumping in the indirect addressing function.
-void CPU::OpJMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpJMP(uint16_t address, Mem& memory)
 {
     PC = address;
 }
 
-void CPU::OpJSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpJSR(uint16_t address, Mem& memory)
 {
     PushWordToStack(PC - 1, memory);
     PC = address;
 }
 
-void CPU::OpRTS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpRTS(uint16_t address, Mem& memory)
 {
     PC = PullWordFromStack(memory);
 }
 
-void CPU::OpBCC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBCC(uint16_t address, Mem& memory)
 {
     ConditionalBranch(C, false, address);
 }
 
-void CPU::OpBCS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBCS(uint16_t address, Mem& memory)
 {
     ConditionalBranch(C, true, address);
 }
 
-void CPU::OpBEQ(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBEQ(uint16_t address, Mem& memory)
 {
     ConditionalBranch(Z, true, address);
 }
 
-void CPU::OpBMI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBMI(uint16_t address, Mem& memory)
 {
     ConditionalBranch(N, true, address);
 }
 
-void CPU::OpBNE(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBNE(uint16_t address, Mem& memory)
 {
     ConditionalBranch(Z, false, address);
 }
 
-void CPU::OpBPL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBPL(uint16_t address, Mem& memory)
 {
     ConditionalBranch(N, false, address);
 }
 
-void CPU::OpBVC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBVC(uint16_t address, Mem& memory)
 {
     ConditionalBranch(V, false, address);
 }
 
-void CPU::OpBVS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBVS(uint16_t address, Mem& memory)
 {
     ConditionalBranch(V, true, address);
 }
 
-void CPU::OpCLC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCLC(uint16_t address, Mem& memory)
 {
     C = false;
 }
 
-void CPU::OpCLD(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCLD(uint16_t address, Mem& memory)
 {
     D = false;
 }
 
-void CPU::OpCLI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCLI(uint16_t address, Mem& memory)
 {
     I = false;
 }
 
-void CPU::OpCLV(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCLV(uint16_t address, Mem& memory)
 {
     V = false;
 }
 
-void CPU::OpSEC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSEC(uint16_t address, Mem& memory)
 {
     C = true;
 }
 
-void CPU::OpSED(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSED(uint16_t address, Mem& memory)
 {
     D = true;
 }
 
-void CPU::OpSEI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSEI(uint16_t address, Mem& memory)
 {
     I = true;
 }
 
-void CPU::OpBRK(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBRK(uint16_t address, Mem& memory)
 {
     PushWordToStack(PC, memory);
     PushByteToStack(PS, memory);
@@ -901,18 +901,18 @@ void CPU::OpBRK(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     B = true;
 }
 
-void CPU::OpNOP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpNOP(uint16_t address, Mem& memory)
 {
     ;
 }
 
-void CPU::OpRTI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpRTI(uint16_t address, Mem& memory)
 {
     PS = PullByteFromStack(memory);
     PC = PullWordFromStack(memory);
 }
 
-void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpIllegal(uint16_t address, Mem& memory)
 {
     std::stringstream stream;
     stream << "Unhandled instruction: 0x" << std::hex << address;
