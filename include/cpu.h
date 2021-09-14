@@ -62,60 +62,66 @@ class CPU
     };
 
    private:
-    using AddressExecution = uint16_t (CPU::*)(uint32_t&, Mem&);
+    using AddressExecution = uint16_t (CPU::*)(Mem&);
     using OperationExecution = void (CPU::*)(uint32_t&, uint16_t, Mem&);
 
     struct Instruction
     {
         AddressExecution addr;
         OperationExecution op;
+        uint8_t cycles;
     };
 
     std::array<Instruction, 256> dispatch_table;
     void ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory);
 
     // Addressing mode functions
-    uint16_t AddrOpcode(uint32_t&, Mem& memory);  // Used for debugging illegal opcodes
-    uint16_t AddrAccumulator(uint32_t&, Mem&);
-    uint16_t AddrImplied(uint32_t&, Mem&);  // Does not do anything
-    uint16_t AddrImmediate(uint32_t&, Mem&);
-    uint16_t AddrZeroPage(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrZeroPageX(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrZeroPageY(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrAbsolute(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrAbsoluteX(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrAbsoluteX5(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrIndirect(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory);
-    uint16_t AddrRelative(uint32_t& machine_cycles, Mem& memory);
+    uint16_t AddrOpcode(Mem& memory);  // Used for debugging illegal opcodes
+    uint16_t AddrAccumulator(Mem& memory);
+    uint16_t AddrImplied(Mem& memory);  // Does not do anything
+    uint16_t AddrImmediate(Mem& memory);
+    uint16_t AddrZeroPage(Mem& memory);
+    uint16_t AddrZeroPageX(Mem& memory);
+    uint16_t AddrZeroPageY(Mem& memory);
+    uint16_t AddrAbsolute(Mem& memory);
+    uint16_t AddrAbsoluteX(Mem& memory);
+    uint16_t AddrAbsoluteX5(Mem& memory);
+    uint16_t AddrAbsoluteY(Mem& memory);
+    uint16_t AddrAbsoluteY5(Mem& memory);
+    uint16_t AddrIndirect(Mem& memory);
+    uint16_t AddrIndexedIndirect(Mem& memory);
+    uint16_t AddrIndirectIndexed(Mem& memory);
+    uint16_t AddrIndirectIndexed6(Mem& memory);
+    uint16_t AddrRelative(Mem& memory);
+
+    // If branching operations are succesful, they consume a cycle, so does NOP.
+    // Some instructions consume an extra cycle if the zero page is crossed.
+    bool consume_cycle = false;
+    bool page_crossed = false;
 
     // Sets the Z, N flag for the LDA, LDX and LDY instructions
     void SetFlagsZN(uint8_t reg);
 
     // Used for all branching operations
-    void ConditionalBranch(bool flag, bool status, uint32_t& machine_cycles, uint16_t address);
+    void ConditionalBranch(bool flag, bool status, uint16_t address);
 
     // Fetch a single byte from memory offsetted by the PC
-    uint8_t FetchByte(uint32_t& machine_cycles, Mem& memory);
-    uint16_t FetchWord(uint32_t& machine_cycles, Mem& memory);
+    uint8_t FetchByte(Mem& memory);
+    uint16_t FetchWord(Mem& memory);
 
     // Like FetchByte, except it fetches using an address and it does not
     // increment the program counter
-    uint8_t ReadByte(uint32_t& machine_cycles, uint16_t address, Mem& memory);
-    void StoreByte(uint32_t& machine_cycles, uint16_t address, uint8_t value, Mem& memory);
+    uint8_t ReadByte(uint16_t address, Mem& memory);
+    void StoreByte(uint16_t address, uint8_t value, Mem& memory);
 
-    uint16_t ReadWord(uint32_t& machine_cycles, uint16_t address, Mem& memory);
-    void StoreWord(uint32_t& machine_cycles, uint16_t address, uint16_t value, Mem& memory);
+    uint16_t ReadWord(uint16_t address, Mem& memory);
+    void StoreWord(uint16_t address, uint16_t value, Mem& memory);
 
     // Stack operations
-    void PushByteToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory);
-    void PushWordToStack(uint32_t& machine_cycles, uint16_t value, Mem& memory);
-    uint8_t PullByteFromStack(uint32_t& machine_cycles, Mem& memory);
-    uint16_t PullWordFromStack(uint32_t& machine_cycles, Mem& memory);
+    void PushByteToStack(uint8_t value, Mem& memory);
+    void PushWordToStack(uint16_t value, Mem& memory);
+    uint8_t PullByteFromStack(Mem& memory);
+    uint16_t PullWordFromStack(Mem& memory);
 
     // Operation functions
     // LOAD & STORE
