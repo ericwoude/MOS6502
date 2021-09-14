@@ -96,7 +96,7 @@ class CPU
     // Sets the Z, N flag for the LDA, LDX and LDY instructions
     void SetFlagsZN(uint8_t reg);
 
-    // Used for all branching instructions
+    // Used for all branching operations
     void ConditionalBranch(bool flag, bool status, uint32_t& machine_cycles, uint16_t address);
 
     // Fetch a single byte from memory offsetted by the PC
@@ -186,6 +186,15 @@ class CPU
     void OpBPL(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpBVC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpBVS(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
+    // STATUS FLAG OPERATIONS
+    void OpCLC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpCLD(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpCLI(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpCLV(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpSEC(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpSED(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpSEI(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
