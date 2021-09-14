@@ -44,7 +44,7 @@ CPU::CPU()
     ADD_DISPATCH(0xA9, LDA, Immediate);
     ADD_DISPATCH(0xA5, LDA, ZeroPage);
     ADD_DISPATCH(0xB5, LDA, ZeroPageX);
-    ADD_DISPATCH(0x6D, LDA, Absolute);
+    ADD_DISPATCH(0xAD, LDA, Absolute);
     ADD_DISPATCH(0xBD, LDA, AbsoluteX);
     ADD_DISPATCH(0xB9, LDA, AbsoluteY);
     ADD_DISPATCH(0xA1, LDA, IndexedIndirect);

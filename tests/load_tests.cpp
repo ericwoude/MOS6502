@@ -111,7 +111,7 @@ TEST_F(LoadTests, LDAZeroPageXWrapAround)
 TEST_F(LoadTests, LDAAbsolute)
 {
     // INLINE PROGRAM
-    mem[0xFFFC] = 0x6D;
+    mem[0xFFFC] = 0xAD;
     mem[0xFFFD] = 0x05;
     mem[0xFFFE] = 0x05;
     mem[0x0505] = 0x22;
