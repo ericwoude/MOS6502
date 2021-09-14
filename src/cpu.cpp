@@ -223,6 +223,11 @@ CPU::CPU()
     ADD_DISPATCH(0x38, SEC, Implied);
     ADD_DISPATCH(0xF8, SED, Implied);
     ADD_DISPATCH(0x78, SEI, Implied);
+
+    // SYSTEM OPERATIONS
+    ADD_DISPATCH(0x00, BRK, Implied);
+    ADD_DISPATCH(0xEA, NOP, Implied);
+    ADD_DISPATCH(0x40, RTI, Implied);
 }
 
 void CPU::Reset(Mem& memory)
@@ -315,12 +320,9 @@ uint8_t CPU::PullByteFromStack(uint32_t& machine_cycles, Mem& memory)
 
 uint16_t CPU::PullWordFromStack(uint32_t& machine_cycles, Mem& memory)
 {
-    uint8_t l = PullByteFromStack(machine_cycles, memory);
-    uint8_t h = PullByteFromStack(machine_cycles, memory);
-
-    uint16_t result = (h << 8) | l;
-
-    return result;
+    SP++;
+    machine_cycles -= 1;
+    return ReadWord(machine_cycles, 0x100 + SP, memory);
 }
 
 // Instruction specific functions
@@ -836,7 +838,7 @@ void CPU::OpJSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 void CPU::OpRTS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     PC = PullWordFromStack(machine_cycles, memory);
-    machine_cycles--;
+    machine_cycles -= 2;
 }
 
 void CPU::OpBCC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
@@ -919,6 +921,27 @@ void CPU::OpSEI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     I = true;
     machine_cycles--;
+}
+
+void CPU::OpBRK(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    // void CPU::PushWordToStack(uint32_t& machine_cycles, uint16_t value, Mem& memory)
+
+    PushWordToStack(machine_cycles, PC, memory);
+    PushByteToStack(machine_cycles, PS, memory);
+    PC = FetchWord(machine_cycles, memory);
+    B = true;
+}
+
+void CPU::OpNOP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    machine_cycles--;
+}
+
+void CPU::OpRTI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    PS = PullByteFromStack(machine_cycles, memory);
+    PC = PullWordFromStack(machine_cycles, memory);
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
