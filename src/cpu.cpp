@@ -214,6 +214,15 @@ CPU::CPU()
     ADD_DISPATCH(0x10, BPL, Relative);
     ADD_DISPATCH(0x50, BVC, Relative);
     ADD_DISPATCH(0x70, BVS, Relative);
+
+    // STATUS FLAG OPERATIONS
+    ADD_DISPATCH(0x18, CLC, Implied);
+    ADD_DISPATCH(0xD8, CLD, Implied);
+    ADD_DISPATCH(0x58, CLI, Implied);
+    ADD_DISPATCH(0xB8, CLV, Implied);
+    ADD_DISPATCH(0x38, SEC, Implied);
+    ADD_DISPATCH(0xF8, SED, Implied);
+    ADD_DISPATCH(0x78, SEI, Implied);
 }
 
 void CPU::Reset(Mem& memory)
@@ -868,6 +877,48 @@ void CPU::OpBVC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 void CPU::OpBVS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
 {
     ConditionalBranch(V, true, machine_cycles, address);
+}
+
+void CPU::OpCLC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    C = false;
+    machine_cycles--;
+}
+
+void CPU::OpCLD(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    D = false;
+    machine_cycles--;
+}
+
+void CPU::OpCLI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    I = false;
+    machine_cycles--;
+}
+
+void CPU::OpCLV(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    V = false;
+    machine_cycles--;
+}
+
+void CPU::OpSEC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    C = true;
+    machine_cycles--;
+}
+
+void CPU::OpSED(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    D = true;
+    machine_cycles--;
+}
+
+void CPU::OpSEI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+{
+    I = true;
+    machine_cycles--;
 }
 
 void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
