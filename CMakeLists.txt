@@ -40,6 +40,7 @@ add_executable(
     tests/shifts_tests.cpp
     tests/jumps_calls_tests.cpp
     tests/branch_tests.cpp
+    tests/status_flag_tests.cpp
 )
 
 target_link_libraries(
