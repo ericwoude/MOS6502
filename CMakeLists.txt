@@ -41,6 +41,7 @@ add_executable(
     tests/jumps_calls_tests.cpp
     tests/branch_tests.cpp
     tests/status_flag_tests.cpp
+    tests/system_tests.cpp
 )
 
 target_link_libraries(
