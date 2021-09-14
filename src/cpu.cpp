@@ -27,9 +27,10 @@
 #include <iomanip>
 #include <sstream>
 
-#define ADD_DISPATCH(HEX, NAME, ADDRESSING_MODE)    \
-    instruction.addr = &CPU::Addr##ADDRESSING_MODE; \
-    instruction.op = &CPU::Op##NAME;                \
+#define ADD_DISPATCH(HEX, NAME, CYCLES, ADDRESSING_MODE) \
+    instruction.addr = &CPU::Addr##ADDRESSING_MODE;      \
+    instruction.op = &CPU::Op##NAME;                     \
+    instruction.cycles = CYCLES;                         \
     dispatch_table[HEX] = instruction
 
 CPU::CPU()
@@ -38,196 +39,197 @@ CPU::CPU()
     Instruction instruction;
     instruction.addr = &CPU::AddrOpcode;
     instruction.op = &CPU::OpIllegal;
+    instruction.cycles = 0;
     dispatch_table.fill(instruction);
 
     // LOAD & STORE
-    ADD_DISPATCH(0xA9, LDA, Immediate);
-    ADD_DISPATCH(0xA5, LDA, ZeroPage);
-    ADD_DISPATCH(0xB5, LDA, ZeroPageX);
-    ADD_DISPATCH(0x6D, LDA, Absolute);
-    ADD_DISPATCH(0xBD, LDA, AbsoluteX);
-    ADD_DISPATCH(0xB9, LDA, AbsoluteY);
-    ADD_DISPATCH(0xA1, LDA, IndexedIndirect);
-    ADD_DISPATCH(0xB1, LDA, IndirectIndexed);
+    ADD_DISPATCH(0xA9, LDA, 2, Immediate);
+    ADD_DISPATCH(0xA5, LDA, 3, ZeroPage);
+    ADD_DISPATCH(0xB5, LDA, 4, ZeroPageX);
+    ADD_DISPATCH(0xAD, LDA, 4, Absolute);
+    ADD_DISPATCH(0xBD, LDA, 4, AbsoluteX);
+    ADD_DISPATCH(0xB9, LDA, 4, AbsoluteY);
+    ADD_DISPATCH(0xA1, LDA, 6, IndexedIndirect);
+    ADD_DISPATCH(0xB1, LDA, 5, IndirectIndexed);
 
-    ADD_DISPATCH(0xA2, LDX, Immediate);
-    ADD_DISPATCH(0xA6, LDX, ZeroPage);
-    ADD_DISPATCH(0xB6, LDX, ZeroPageY);
-    ADD_DISPATCH(0xAE, LDX, Absolute);
-    ADD_DISPATCH(0xBE, LDX, AbsoluteY);
+    ADD_DISPATCH(0xA2, LDX, 2, Immediate);
+    ADD_DISPATCH(0xA6, LDX, 3, ZeroPage);
+    ADD_DISPATCH(0xB6, LDX, 4, ZeroPageY);
+    ADD_DISPATCH(0xAE, LDX, 4, Absolute);
+    ADD_DISPATCH(0xBE, LDX, 4, AbsoluteY);
 
-    ADD_DISPATCH(0xA0, LDY, Immediate);
-    ADD_DISPATCH(0xA4, LDY, ZeroPage);
-    ADD_DISPATCH(0xB4, LDY, ZeroPageX);
-    ADD_DISPATCH(0xAC, LDY, Absolute);
-    ADD_DISPATCH(0xBC, LDY, AbsoluteX);
+    ADD_DISPATCH(0xA0, LDY, 2, Immediate);
+    ADD_DISPATCH(0xA4, LDY, 3, ZeroPage);
+    ADD_DISPATCH(0xB4, LDY, 4, ZeroPageX);
+    ADD_DISPATCH(0xAC, LDY, 4, Absolute);
+    ADD_DISPATCH(0xBC, LDY, 4, AbsoluteX);
 
-    ADD_DISPATCH(0x85, STA, ZeroPage);
-    ADD_DISPATCH(0x95, STA, ZeroPageX);
-    ADD_DISPATCH(0x8D, STA, Absolute);
-    ADD_DISPATCH(0x9D, STA, AbsoluteX5);
-    ADD_DISPATCH(0x99, STA, AbsoluteY5);
-    ADD_DISPATCH(0x81, STA, IndexedIndirect);
-    ADD_DISPATCH(0x91, STA, IndirectIndexed6);
+    ADD_DISPATCH(0x85, STA, 3, ZeroPage);
+    ADD_DISPATCH(0x95, STA, 4, ZeroPageX);
+    ADD_DISPATCH(0x8D, STA, 4, Absolute);
+    ADD_DISPATCH(0x9D, STA, 5, AbsoluteX5);
+    ADD_DISPATCH(0x99, STA, 5, AbsoluteY5);
+    ADD_DISPATCH(0x81, STA, 6, IndexedIndirect);
+    ADD_DISPATCH(0x91, STA, 6, IndirectIndexed6);
 
-    ADD_DISPATCH(0x86, STX, ZeroPage);
-    ADD_DISPATCH(0x96, STX, ZeroPageY);
-    ADD_DISPATCH(0x8e, STX, Absolute);
+    ADD_DISPATCH(0x86, STX, 3, ZeroPage);
+    ADD_DISPATCH(0x96, STX, 4, ZeroPageY);
+    ADD_DISPATCH(0x8e, STX, 4, Absolute);
 
-    ADD_DISPATCH(0x84, STY, ZeroPage);
-    ADD_DISPATCH(0x94, STY, ZeroPageX);
-    ADD_DISPATCH(0x8C, STY, Absolute);
+    ADD_DISPATCH(0x84, STY, 3, ZeroPage);
+    ADD_DISPATCH(0x94, STY, 4, ZeroPageX);
+    ADD_DISPATCH(0x8C, STY, 4, Absolute);
 
     // REGISTER TRANSFERS
-    ADD_DISPATCH(0xAA, TAX, Implied);
-    ADD_DISPATCH(0xA8, TAY, Implied);
-    ADD_DISPATCH(0x8A, TXA, Implied);
-    ADD_DISPATCH(0x98, TYA, Implied);
+    ADD_DISPATCH(0xAA, TAX, 2, Implied);
+    ADD_DISPATCH(0xA8, TAY, 2, Implied);
+    ADD_DISPATCH(0x8A, TXA, 2, Implied);
+    ADD_DISPATCH(0x98, TYA, 2, Implied);
 
     // STACK OPERATIONS
-    ADD_DISPATCH(0xBA, TSX, Implied);
-    ADD_DISPATCH(0x9A, TXS, Implied);
-    ADD_DISPATCH(0x48, PHA, Implied);
-    ADD_DISPATCH(0x08, PHP, Implied);
-    ADD_DISPATCH(0x68, PLA, Implied);
-    ADD_DISPATCH(0x28, PLP, Implied);
+    ADD_DISPATCH(0xBA, TSX, 2, Implied);
+    ADD_DISPATCH(0x9A, TXS, 2, Implied);
+    ADD_DISPATCH(0x48, PHA, 3, Implied);
+    ADD_DISPATCH(0x08, PHP, 3, Implied);
+    ADD_DISPATCH(0x68, PLA, 4, Implied);
+    ADD_DISPATCH(0x28, PLP, 4, Implied);
 
     // LOGICAL OPERATIONS
-    ADD_DISPATCH(0x29, AND, Immediate);
-    ADD_DISPATCH(0x25, AND, ZeroPage);
-    ADD_DISPATCH(0x35, AND, ZeroPageX);
-    ADD_DISPATCH(0x2D, AND, Absolute);
-    ADD_DISPATCH(0x3D, AND, AbsoluteX);
-    ADD_DISPATCH(0x39, AND, AbsoluteY);
-    ADD_DISPATCH(0x21, AND, IndexedIndirect);
-    ADD_DISPATCH(0x31, AND, IndirectIndexed);
+    ADD_DISPATCH(0x29, AND, 2, Immediate);
+    ADD_DISPATCH(0x25, AND, 3, ZeroPage);
+    ADD_DISPATCH(0x35, AND, 4, ZeroPageX);
+    ADD_DISPATCH(0x2D, AND, 4, Absolute);
+    ADD_DISPATCH(0x3D, AND, 4, AbsoluteX);
+    ADD_DISPATCH(0x39, AND, 4, AbsoluteY);
+    ADD_DISPATCH(0x21, AND, 6, IndexedIndirect);
+    ADD_DISPATCH(0x31, AND, 5, IndirectIndexed);
 
-    ADD_DISPATCH(0x49, EOR, Immediate);
-    ADD_DISPATCH(0x45, EOR, ZeroPage);
-    ADD_DISPATCH(0x55, EOR, ZeroPageX);
-    ADD_DISPATCH(0x4D, EOR, Absolute);
-    ADD_DISPATCH(0x5D, EOR, AbsoluteX);
-    ADD_DISPATCH(0x59, EOR, AbsoluteY);
-    ADD_DISPATCH(0x41, EOR, IndexedIndirect);
-    ADD_DISPATCH(0x51, EOR, IndirectIndexed);
+    ADD_DISPATCH(0x49, EOR, 2, Immediate);
+    ADD_DISPATCH(0x45, EOR, 3, ZeroPage);
+    ADD_DISPATCH(0x55, EOR, 4, ZeroPageX);
+    ADD_DISPATCH(0x4D, EOR, 4, Absolute);
+    ADD_DISPATCH(0x5D, EOR, 4, AbsoluteX);
+    ADD_DISPATCH(0x59, EOR, 4, AbsoluteY);
+    ADD_DISPATCH(0x41, EOR, 6, IndexedIndirect);
+    ADD_DISPATCH(0x51, EOR, 5, IndirectIndexed);
 
-    ADD_DISPATCH(0x09, ORA, Immediate);
-    ADD_DISPATCH(0x05, ORA, ZeroPage);
-    ADD_DISPATCH(0x15, ORA, ZeroPageX);
-    ADD_DISPATCH(0x0D, ORA, Absolute);
-    ADD_DISPATCH(0x1D, ORA, AbsoluteX);
-    ADD_DISPATCH(0x19, ORA, AbsoluteY);
-    ADD_DISPATCH(0x01, ORA, IndexedIndirect);
-    ADD_DISPATCH(0x11, ORA, IndirectIndexed);
+    ADD_DISPATCH(0x09, ORA, 2, Immediate);
+    ADD_DISPATCH(0x05, ORA, 3, ZeroPage);
+    ADD_DISPATCH(0x15, ORA, 4, ZeroPageX);
+    ADD_DISPATCH(0x0D, ORA, 4, Absolute);
+    ADD_DISPATCH(0x1D, ORA, 4, AbsoluteX);
+    ADD_DISPATCH(0x19, ORA, 4, AbsoluteY);
+    ADD_DISPATCH(0x01, ORA, 6, IndexedIndirect);
+    ADD_DISPATCH(0x11, ORA, 5, IndirectIndexed);
 
-    ADD_DISPATCH(0x24, BIT, ZeroPage);
-    ADD_DISPATCH(0x2C, BIT, Absolute);
+    ADD_DISPATCH(0x24, BIT, 3, ZeroPage);
+    ADD_DISPATCH(0x2C, BIT, 4, Absolute);
 
     // ARITHMETIC OPERATIONS
-    ADD_DISPATCH(0x69, ADC, Immediate);
-    ADD_DISPATCH(0x65, ADC, ZeroPage);
-    ADD_DISPATCH(0x75, ADC, ZeroPageX);
-    ADD_DISPATCH(0x6D, ADC, Absolute);
-    ADD_DISPATCH(0x7D, ADC, AbsoluteX);
-    ADD_DISPATCH(0x79, ADC, AbsoluteY);
-    ADD_DISPATCH(0x61, ADC, IndexedIndirect);
-    ADD_DISPATCH(0x71, ADC, IndirectIndexed);
+    ADD_DISPATCH(0x69, ADC, 2, Immediate);
+    ADD_DISPATCH(0x65, ADC, 3, ZeroPage);
+    ADD_DISPATCH(0x75, ADC, 4, ZeroPageX);
+    ADD_DISPATCH(0x6D, ADC, 4, Absolute);
+    ADD_DISPATCH(0x7D, ADC, 4, AbsoluteX);
+    ADD_DISPATCH(0x79, ADC, 4, AbsoluteY);
+    ADD_DISPATCH(0x61, ADC, 6, IndexedIndirect);
+    ADD_DISPATCH(0x71, ADC, 5, IndirectIndexed);
 
-    ADD_DISPATCH(0xE9, SBC, Immediate);
-    ADD_DISPATCH(0xE5, SBC, ZeroPage);
-    ADD_DISPATCH(0xF5, SBC, ZeroPageX);
-    ADD_DISPATCH(0xED, SBC, Absolute);
-    ADD_DISPATCH(0xFD, SBC, AbsoluteX);
-    ADD_DISPATCH(0xF9, SBC, AbsoluteY);
-    ADD_DISPATCH(0xE1, SBC, IndexedIndirect);
-    ADD_DISPATCH(0xF1, SBC, IndirectIndexed);
+    ADD_DISPATCH(0xE9, SBC, 2, Immediate);
+    ADD_DISPATCH(0xE5, SBC, 3, ZeroPage);
+    ADD_DISPATCH(0xF5, SBC, 4, ZeroPageX);
+    ADD_DISPATCH(0xED, SBC, 4, Absolute);
+    ADD_DISPATCH(0xFD, SBC, 4, AbsoluteX);
+    ADD_DISPATCH(0xF9, SBC, 4, AbsoluteY);
+    ADD_DISPATCH(0xE1, SBC, 6, IndexedIndirect);
+    ADD_DISPATCH(0xF1, SBC, 5, IndirectIndexed);
 
-    ADD_DISPATCH(0xC9, CMP, Immediate);
-    ADD_DISPATCH(0xC5, CMP, ZeroPage);
-    ADD_DISPATCH(0xD5, CMP, ZeroPageX);
-    ADD_DISPATCH(0xCD, CMP, Absolute);
-    ADD_DISPATCH(0xDD, CMP, AbsoluteX);
-    ADD_DISPATCH(0xD9, CMP, AbsoluteY);
-    ADD_DISPATCH(0xC1, CMP, IndexedIndirect);
-    ADD_DISPATCH(0xD1, CMP, IndirectIndexed);
+    ADD_DISPATCH(0xC9, CMP, 2, Immediate);
+    ADD_DISPATCH(0xC5, CMP, 3, ZeroPage);
+    ADD_DISPATCH(0xD5, CMP, 4, ZeroPageX);
+    ADD_DISPATCH(0xCD, CMP, 4, Absolute);
+    ADD_DISPATCH(0xDD, CMP, 4, AbsoluteX);
+    ADD_DISPATCH(0xD9, CMP, 4, AbsoluteY);
+    ADD_DISPATCH(0xC1, CMP, 6, IndexedIndirect);
+    ADD_DISPATCH(0xD1, CMP, 5, IndirectIndexed);
 
-    ADD_DISPATCH(0xE0, CPX, Immediate);
-    ADD_DISPATCH(0xE4, CPX, ZeroPage);
-    ADD_DISPATCH(0xEC, CPX, Absolute);
+    ADD_DISPATCH(0xE0, CPX, 2, Immediate);
+    ADD_DISPATCH(0xE4, CPX, 3, ZeroPage);
+    ADD_DISPATCH(0xEC, CPX, 4, Absolute);
 
-    ADD_DISPATCH(0xC0, CPY, Immediate);
-    ADD_DISPATCH(0xC4, CPY, ZeroPage);
-    ADD_DISPATCH(0xCC, CPY, Absolute);
+    ADD_DISPATCH(0xC0, CPY, 2, Immediate);
+    ADD_DISPATCH(0xC4, CPY, 3, ZeroPage);
+    ADD_DISPATCH(0xCC, CPY, 4, Absolute);
 
     // INCREMENT & DECREMENT OPERATIONS
-    ADD_DISPATCH(0xE6, INC, ZeroPage);
-    ADD_DISPATCH(0xF6, INC, ZeroPageX);
-    ADD_DISPATCH(0xEE, INC, Absolute);
-    ADD_DISPATCH(0xFE, INC, AbsoluteX);
-    ADD_DISPATCH(0xE8, INX, Implied);
-    ADD_DISPATCH(0xC8, INY, Implied);
+    ADD_DISPATCH(0xE6, INC, 5, ZeroPage);
+    ADD_DISPATCH(0xF6, INC, 6, ZeroPageX);
+    ADD_DISPATCH(0xEE, INC, 6, Absolute);
+    ADD_DISPATCH(0xFE, INC, 7, AbsoluteX);
+    ADD_DISPATCH(0xE8, INX, 2, Implied);
+    ADD_DISPATCH(0xC8, INY, 2, Implied);
 
-    ADD_DISPATCH(0xC6, DEC, ZeroPage);
-    ADD_DISPATCH(0xD6, DEC, ZeroPageX);
-    ADD_DISPATCH(0xCE, DEC, Absolute);
-    ADD_DISPATCH(0xDE, DEC, AbsoluteX);
-    ADD_DISPATCH(0xCA, DEX, Implied);
-    ADD_DISPATCH(0x88, DEY, Implied);
+    ADD_DISPATCH(0xC6, DEC, 5, ZeroPage);
+    ADD_DISPATCH(0xD6, DEC, 6, ZeroPageX);
+    ADD_DISPATCH(0xCE, DEC, 6, Absolute);
+    ADD_DISPATCH(0xDE, DEC, 7, AbsoluteX);
+    ADD_DISPATCH(0xCA, DEX, 2, Implied);
+    ADD_DISPATCH(0x88, DEY, 2, Implied);
 
     // SHIFT OPERATIONS
-    ADD_DISPATCH(0x0A, ASLA, Accumulator);
-    ADD_DISPATCH(0x06, ASL, ZeroPage);
-    ADD_DISPATCH(0x16, ASL, ZeroPageX);
-    ADD_DISPATCH(0x0E, ASL, Absolute);
-    ADD_DISPATCH(0x1E, ASL, AbsoluteX);
+    ADD_DISPATCH(0x0A, ASLA, 2, Accumulator);
+    ADD_DISPATCH(0x06, ASL, 5, ZeroPage);
+    ADD_DISPATCH(0x16, ASL, 6, ZeroPageX);
+    ADD_DISPATCH(0x0E, ASL, 6, Absolute);
+    ADD_DISPATCH(0x1E, ASL, 7, AbsoluteX);
 
-    ADD_DISPATCH(0x4A, LSRA, Accumulator);
-    ADD_DISPATCH(0x46, LSR, ZeroPage);
-    ADD_DISPATCH(0x56, LSR, ZeroPageX);
-    ADD_DISPATCH(0x4E, LSR, Absolute);
-    ADD_DISPATCH(0x5E, LSR, AbsoluteX);
+    ADD_DISPATCH(0x4A, LSRA, 2, Accumulator);
+    ADD_DISPATCH(0x46, LSR, 5, ZeroPage);
+    ADD_DISPATCH(0x56, LSR, 6, ZeroPageX);
+    ADD_DISPATCH(0x4E, LSR, 6, Absolute);
+    ADD_DISPATCH(0x5E, LSR, 7, AbsoluteX);
 
-    ADD_DISPATCH(0x2A, ROLA, Accumulator);
-    ADD_DISPATCH(0x26, ROL, ZeroPage);
-    ADD_DISPATCH(0x36, ROL, ZeroPageX);
-    ADD_DISPATCH(0x2E, ROL, Absolute);
-    ADD_DISPATCH(0x3E, ROL, AbsoluteX);
+    ADD_DISPATCH(0x2A, ROLA, 2, Accumulator);
+    ADD_DISPATCH(0x26, ROL, 5, ZeroPage);
+    ADD_DISPATCH(0x36, ROL, 6, ZeroPageX);
+    ADD_DISPATCH(0x2E, ROL, 6, Absolute);
+    ADD_DISPATCH(0x3E, ROL, 7, AbsoluteX);
 
-    ADD_DISPATCH(0x6A, RORA, Accumulator);
-    ADD_DISPATCH(0x66, ROR, ZeroPage);
-    ADD_DISPATCH(0x76, ROR, ZeroPageX);
-    ADD_DISPATCH(0x6E, ROR, Absolute);
-    ADD_DISPATCH(0x7E, ROR, AbsoluteX);
+    ADD_DISPATCH(0x6A, RORA, 2, Accumulator);
+    ADD_DISPATCH(0x66, ROR, 5, ZeroPage);
+    ADD_DISPATCH(0x76, ROR, 6, ZeroPageX);
+    ADD_DISPATCH(0x6E, ROR, 6, Absolute);
+    ADD_DISPATCH(0x7E, ROR, 7, AbsoluteX);
 
     // JUMPS & CALLS OPERATIONS
-    ADD_DISPATCH(0x4C, JMP, Absolute);
-    ADD_DISPATCH(0x6C, JMP, Indirect);
-    ADD_DISPATCH(0x20, JSR, Absolute);
-    ADD_DISPATCH(0x60, RTS, Implied);
+    ADD_DISPATCH(0x4C, JMP, 3, Absolute);
+    ADD_DISPATCH(0x6C, JMP, 5, Indirect);
+    ADD_DISPATCH(0x20, JSR, 6, Absolute);
+    ADD_DISPATCH(0x60, RTS, 6, Implied);
 
     // BRANCH OPERATIONS
-    ADD_DISPATCH(0x90, BCC, Relative);
-    ADD_DISPATCH(0xB0, BCS, Relative);
-    ADD_DISPATCH(0xF0, BEQ, Relative);
-    ADD_DISPATCH(0x30, BMI, Relative);
-    ADD_DISPATCH(0xD0, BNE, Relative);
-    ADD_DISPATCH(0x10, BPL, Relative);
-    ADD_DISPATCH(0x50, BVC, Relative);
-    ADD_DISPATCH(0x70, BVS, Relative);
-
+    ADD_DISPATCH(0x90, BCC, 2, Relative);
+    ADD_DISPATCH(0xB0, BCS, 2, Relative);
+    ADD_DISPATCH(0xF0, BEQ, 2, Relative);
+    ADD_DISPATCH(0x30, BMI, 2, Relative);
+    ADD_DISPATCH(0xD0, BNE, 2, Relative);
+    ADD_DISPATCH(0x10, BPL, 2, Relative);
+    ADD_DISPATCH(0x50, BVC, 2, Relative);
+    ADD_DISPATCH(0x70, BVS, 2, Relative);
+    // TAKE A LOOK AT THIS, IT IS 2 + 1 OR 2
     // STATUS FLAG OPERATIONS
-    ADD_DISPATCH(0x18, CLC, Implied);
-    ADD_DISPATCH(0xD8, CLD, Implied);
-    ADD_DISPATCH(0x58, CLI, Implied);
-    ADD_DISPATCH(0xB8, CLV, Implied);
-    ADD_DISPATCH(0x38, SEC, Implied);
-    ADD_DISPATCH(0xF8, SED, Implied);
-    ADD_DISPATCH(0x78, SEI, Implied);
+    ADD_DISPATCH(0x18, CLC, 2, Implied);
+    ADD_DISPATCH(0xD8, CLD, 2, Implied);
+    ADD_DISPATCH(0x58, CLI, 2, Implied);
+    ADD_DISPATCH(0xB8, CLV, 2, Implied);
+    ADD_DISPATCH(0x38, SEC, 2, Implied);
+    ADD_DISPATCH(0xF8, SED, 2, Implied);
+    ADD_DISPATCH(0x78, SEI, 2, Implied);
 
-    // SYSTEM OPERATIONS
-    ADD_DISPATCH(0x00, BRK, Implied);
-    ADD_DISPATCH(0xEA, NOP, Implied);
-    ADD_DISPATCH(0x40, RTI, Implied);
+    // // SYSTEM OPERATIONS
+    ADD_DISPATCH(0x00, BRK, 7, Implied);
+    ADD_DISPATCH(0xEA, NOP, 2, Implied);
+    ADD_DISPATCH(0x40, RTI, 6, Implied);
 }
 
 void CPU::Reset(Mem& memory)
@@ -248,81 +250,73 @@ void CPU::Reset(Mem& memory)
 }
 
 // Fetch a single byte from memory offsetted by the PC.
-uint8_t CPU::FetchByte(uint32_t& machine_cycles, Mem& memory)
+uint8_t CPU::FetchByte(Mem& memory)
 {
     uint8_t b = memory[PC];
     PC++;
-    machine_cycles--;
 
     return b;
 }
 
-uint16_t CPU::FetchWord(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::FetchWord(Mem& memory)
 {
     uint16_t w = memory[PC];
     w |= (memory[PC + 1] << 8);
 
     PC += 2;
-    machine_cycles -= 2;
 
     return w;
 }
 
 // Like FetchByte, except it fetches using an address and it does not
 // increment the program counter.
-uint8_t CPU::ReadByte(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+uint8_t CPU::ReadByte(uint16_t address, Mem& memory)
 {
     uint8_t b = memory[address];
-    machine_cycles--;
 
     return b;
 }
 
-void CPU::StoreByte(uint32_t& machine_cycles, uint16_t address, uint8_t value, Mem& memory)
+void CPU::StoreByte(uint16_t address, uint8_t value, Mem& memory)
 {
     memory[address] = value;
-    machine_cycles--;
 }
 
-uint16_t CPU::ReadWord(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+uint16_t CPU::ReadWord(uint16_t address, Mem& memory)
 {
-    uint8_t l = ReadByte(machine_cycles, address, memory);
-    uint8_t h = ReadByte(machine_cycles, address + 1, memory);
+    uint8_t l = ReadByte(address, memory);
+    uint8_t h = ReadByte(address + 1, memory);
 
     return (h << 8) | l;
 }
 
-void CPU::StoreWord(uint32_t& machine_cycles, uint16_t address, uint16_t value, Mem& memory)
+void CPU::StoreWord(uint16_t address, uint16_t value, Mem& memory)
 {
     memory[address] = (uint8_t)value << 8;
     memory[address + 1] = (uint8_t)value >> 8;
-    machine_cycles -= 2;
 }
 
-void CPU::PushByteToStack(uint32_t& machine_cycles, uint8_t value, Mem& memory)
+void CPU::PushByteToStack(uint8_t value, Mem& memory)
 {
-    StoreByte(machine_cycles, 0x100 + SP--, value, memory);
-    machine_cycles--;
+    StoreByte(0x100 + SP--, value, memory);
 }
 
-void CPU::PushWordToStack(uint32_t& machine_cycles, uint16_t value, Mem& memory)
+void CPU::PushWordToStack(uint16_t value, Mem& memory)
 {
-    StoreByte(machine_cycles, 0x100 + SP--, value >> 8, memory);
-    StoreByte(machine_cycles, 0x100 + SP--, value & 0xFF, memory);
+    StoreByte(0x100 + SP--, value >> 8, memory);
+    StoreByte(0x100 + SP--, value & 0xFF, memory);
 }
 
-uint8_t CPU::PullByteFromStack(uint32_t& machine_cycles, Mem& memory)
+uint8_t CPU::PullByteFromStack(Mem& memory)
 {
     SP++;
-    machine_cycles -= 1;
-    return ReadByte(machine_cycles, 0x100 + SP, memory);
+    return ReadByte(0x100 + SP, memory);
 }
 
-uint16_t CPU::PullWordFromStack(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::PullWordFromStack(Mem& memory)
 {
     SP++;
-    machine_cycles -= 1;
-    return ReadWord(machine_cycles, 0x100 + SP, memory);
+    return ReadWord(0x100 + SP, memory);
 }
 
 // Instruction specific functions
@@ -332,24 +326,39 @@ void CPU::SetFlagsZN(uint8_t reg)
     N = (reg & 0b10000000) > 0;
 }
 
-void CPU::ConditionalBranch(bool flag, bool status, uint32_t& machine_cycles, uint16_t address)
+void CPU::ConditionalBranch(bool flag, bool status, uint16_t address)
 {
     int8_t relative_address = (int8_t)address;
     if (flag == status)
     {
+        // If the branching is succesful, consume an extra cycle.
+        consume_cycle = true;
+
         // If the branching crosses a page boundary, consume an extra cycle.
-        if ((PC >> 8) != ((PC + relative_address) >> 8))
-            machine_cycles--;
+        page_crossed = ((PC >> 8) != ((PC + relative_address) >> 8));
 
         PC += relative_address;
-        machine_cycles--;
     }
 }
 
 void CPU::ExecInstruction(Instruction instruction, uint32_t& machine_cycles, Mem& memory)
 {
-    uint16_t address = (this->*instruction.addr)(machine_cycles, memory);
-    (this->*instruction.op)(machine_cycles, address, memory);
+    uint16_t address = (this->*instruction.addr)(memory);
+    (this->*instruction.op)(address, memory);
+
+    machine_cycles -= instruction.cycles;
+
+    if (consume_cycle)
+    {
+        machine_cycles--;
+        consume_cycle = false;
+    }
+
+    if (page_crossed)
+    {
+        machine_cycles--;
+        page_crossed = false;
+    }
 }
 
 uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
@@ -357,7 +366,7 @@ uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
     const uint32_t machine_cycles_requested = machine_cycles;
     while (machine_cycles > 0)
     {
-        uint8_t instruction = FetchByte(machine_cycles, memory);
+        uint8_t instruction = FetchByte(memory);
         Instruction ins = dispatch_table[instruction];
         ExecInstruction(ins, machine_cycles, memory);
     }
@@ -367,96 +376,90 @@ uint32_t CPU::Execute(uint32_t machine_cycles, Mem& memory)
 }
 
 // Addressing mode functions
-uint16_t CPU::AddrOpcode(uint32_t&, Mem& memory)
+uint16_t CPU::AddrOpcode(Mem& memory)
 {
     return memory[PC - 1];
 }
 
-uint16_t CPU::AddrAccumulator(uint32_t&, Mem&)
+uint16_t CPU::AddrAccumulator(Mem&)
 {
     return A;
 }
 
-uint16_t CPU::AddrImplied(uint32_t&, Mem&)
+uint16_t CPU::AddrImplied(Mem&)
 {
     return 0;
 }
 
-uint16_t CPU::AddrImmediate(uint32_t&, Mem&)
+uint16_t CPU::AddrImmediate(Mem&)
 {
     return PC++;
 }
 
-uint16_t CPU::AddrZeroPage(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrZeroPage(Mem& memory)
 {
-    return FetchByte(machine_cycles, memory);
+    return FetchByte(memory);
 }
 
-uint16_t CPU::AddrZeroPageX(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrZeroPageX(Mem& memory)
 {
-    uint8_t zeropage_address = FetchByte(machine_cycles, memory);
+    uint8_t zeropage_address = FetchByte(memory);
 
     // If it exceeds the zero page, wrap around.
     uint8_t zeropage_addressX = (zeropage_address + X) & 0xFF;
-    machine_cycles--;
 
     return zeropage_addressX;
 }
 
-uint16_t CPU::AddrZeroPageY(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrZeroPageY(Mem& memory)
 {
-    uint8_t zeropage_address = FetchByte(machine_cycles, memory);
+    uint8_t zeropage_address = FetchByte(memory);
 
     // If it exceeds the zero page, wrap around.
     uint8_t zeropage_addressY = (zeropage_address + Y) & 0xFF;
-    machine_cycles--;
 
     return zeropage_addressY;
 }
 
-uint16_t CPU::AddrAbsolute(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrAbsolute(Mem& memory)
 {
-    return FetchWord(machine_cycles, memory);
+    return FetchWord(memory);
 }
 
-uint16_t CPU::AddrAbsoluteX(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrAbsoluteX(Mem& memory)
 {
-    uint16_t abs_address = FetchWord(machine_cycles, memory);
+    uint16_t abs_address = FetchWord(memory);
     uint16_t sum = abs_address + X;
 
     // If the zero page is crossed
-    if ((abs_address ^ sum) >> 8)
-        machine_cycles--;
+    page_crossed = ((abs_address ^ sum) >> 8);
 
     return sum;
 }
 
-uint16_t CPU::AddrAbsoluteX5(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrAbsoluteX5(Mem& memory)
 {
-    uint16_t abs_address = FetchWord(machine_cycles, memory);
+    uint16_t abs_address = FetchWord(memory);
     uint16_t sum = abs_address + X;
-    machine_cycles--;
 
     return sum;
 }
 
-uint16_t CPU::AddrAbsoluteY(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrAbsoluteY(Mem& memory)
 {
-    uint16_t abs_address = FetchWord(machine_cycles, memory);
+    uint16_t abs_address = FetchWord(memory);
     uint16_t sum = abs_address + Y;
 
     // If the zero page is crossed
-    if ((abs_address ^ sum) >> 8)
-        machine_cycles--;
+    page_crossed = ((abs_address ^ sum) >> 8);
 
     return sum;
 }
 
-uint16_t CPU::AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrAbsoluteY5(Mem& memory)
 {
-    uint16_t abs_address = FetchWord(machine_cycles, memory);
+    uint16_t abs_address = FetchWord(memory);
     uint16_t sum = abs_address + Y;
-    machine_cycles--;
 
     return sum;
 }
@@ -465,179 +468,168 @@ uint16_t CPU::AddrAbsoluteY5(uint32_t& machine_cycles, Mem& memory)
 // bug of the 6502 where a jumping to a vector starting at the last
 // byte of the page will use the high byte of the last byte in the
 // page and the low byte of the first byte in the page.
-uint16_t CPU::AddrIndirect(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrIndirect(Mem& memory)
 {
-    uint8_t l = FetchByte(machine_cycles, memory);
-    uint8_t h = FetchByte(machine_cycles, memory);
+    uint8_t l = FetchByte(memory);
+    uint8_t h = FetchByte(memory);
 
-    uint8_t a = ReadByte(machine_cycles, (uint16_t)(h << 8) | l, memory);
-    uint8_t b = ReadByte(machine_cycles, (uint16_t)(h << 8) | ((l + 1) & 0xFF), memory);
+    uint8_t a = ReadByte((uint16_t)(h << 8) | l, memory);
+    uint8_t b = ReadByte((uint16_t)(h << 8) | ((l + 1) & 0xFF), memory);
 
     return (uint16_t)(b << 8) | a;
 }
 
-uint16_t CPU::AddrIndexedIndirect(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrIndexedIndirect(Mem& memory)
 {
-    uint16_t address = FetchByte(machine_cycles, memory);
-    uint16_t target = ReadWord(machine_cycles, (address + X) & 0xFF, memory);
-    machine_cycles--;
+    uint16_t address = FetchByte(memory);
+    uint16_t target = ReadWord((address + X) & 0xFF, memory);
 
     return target;
 }
 
-uint16_t CPU::AddrIndirectIndexed(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrIndirectIndexed(Mem& memory)
 {
-    uint8_t zeropage_address = FetchByte(machine_cycles, memory);
-    uint16_t target = ReadWord(machine_cycles, zeropage_address, memory);
+    uint8_t zeropage_address = FetchByte(memory);
+    uint16_t target = ReadWord(zeropage_address, memory);
     uint16_t targetY = target + Y;
 
     // If the zero page is crossed
-    if ((target ^ targetY) >> 8)
-        machine_cycles--;
+    page_crossed = ((target ^ targetY) >> 8);
 
     return targetY;
 }
 
-uint16_t CPU::AddrIndirectIndexed6(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrIndirectIndexed6(Mem& memory)
 {
-    uint8_t zeropage_address = FetchByte(machine_cycles, memory);
-    uint16_t target = ReadWord(machine_cycles, zeropage_address, memory);
+    uint8_t zeropage_address = FetchByte(memory);
+    uint16_t target = ReadWord(zeropage_address, memory);
     uint16_t targetY = target + Y;
-    machine_cycles--;
 
     return targetY;
 }
 
-uint16_t CPU::AddrRelative(uint32_t& machine_cycles, Mem& memory)
+uint16_t CPU::AddrRelative(Mem& memory)
 {
-    return FetchByte(machine_cycles, memory);
+    return FetchByte(memory);
 }
 
 // Instruction functions
-void CPU::OpLDA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLDA(uint16_t address, Mem& memory)
 {
-    A = ReadByte(machine_cycles, address, memory);
+    A = ReadByte(address, memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpLDX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLDX(uint16_t address, Mem& memory)
 {
-    X = ReadByte(machine_cycles, address, memory);
+    X = ReadByte(address, memory);
     SetFlagsZN(X);
 }
 
-void CPU::OpLDY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLDY(uint16_t address, Mem& memory)
 {
-    Y = ReadByte(machine_cycles, address, memory);
+    Y = ReadByte(address, memory);
     SetFlagsZN(Y);
 }
 
-void CPU::OpSTA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSTA(uint16_t address, Mem& memory)
 {
-    StoreByte(machine_cycles, address, A, memory);
+    StoreByte(address, A, memory);
 }
 
-void CPU::OpSTX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSTX(uint16_t address, Mem& memory)
 {
-    StoreByte(machine_cycles, address, X, memory);
+    StoreByte(address, X, memory);
 }
 
-void CPU::OpSTY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSTY(uint16_t address, Mem& memory)
 {
-    StoreByte(machine_cycles, address, Y, memory);
+    StoreByte(address, Y, memory);
 }
 
-void CPU::OpTAX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTAX(uint16_t address, Mem& memory)
 {
     X = A;
-    machine_cycles--;
     SetFlagsZN(X);
 }
-void CPU::OpTAY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTAY(uint16_t address, Mem& memory)
 {
     Y = A;
-    machine_cycles--;
     SetFlagsZN(Y);
 }
-void CPU::OpTXA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTXA(uint16_t address, Mem& memory)
 {
     A = X;
-    machine_cycles--;
     SetFlagsZN(A);
 }
-void CPU::OpTYA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTYA(uint16_t address, Mem& memory)
 {
     A = Y;
-    machine_cycles--;
     SetFlagsZN(A);
 }
 
-void CPU::OpTSX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTSX(uint16_t address, Mem& memory)
 {
     X = SP;
-    machine_cycles--;
     SetFlagsZN(X);
 }
 
-void CPU::OpTXS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpTXS(uint16_t address, Mem& memory)
 {
     SP = X;
-    machine_cycles--;
 }
 
-void CPU::OpPHA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpPHA(uint16_t address, Mem& memory)
 {
-    PushByteToStack(machine_cycles, A, memory);
+    PushByteToStack(A, memory);
 }
 
-void CPU::OpPHP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpPHP(uint16_t address, Mem& memory)
 {
-    PushByteToStack(machine_cycles, PS, memory);
+    PushByteToStack(PS, memory);
 }
 
-void CPU::OpPLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpPLA(uint16_t address, Mem& memory)
 {
-    A = PullByteFromStack(machine_cycles, memory);
-    machine_cycles--;
+    A = PullByteFromStack(memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpPLP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpPLP(uint16_t address, Mem& memory)
 {
-    PS = PullByteFromStack(machine_cycles, memory);
-    machine_cycles--;
+    PS = PullByteFromStack(memory);
 }
 
-void CPU::OpAND(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpAND(uint16_t address, Mem& memory)
 {
-    A &= ReadByte(machine_cycles, address, memory);
+    A &= ReadByte(address, memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpEOR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpEOR(uint16_t address, Mem& memory)
 {
-    A ^= ReadByte(machine_cycles, address, memory);
+    A ^= ReadByte(address, memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpORA(uint16_t address, Mem& memory)
 {
-    A |= ReadByte(machine_cycles, address, memory);
+    A |= ReadByte(address, memory);
     SetFlagsZN(A);
 }
 
-void CPU::OpBIT(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBIT(uint16_t address, Mem& memory)
 {
-    uint8_t result = ReadByte(machine_cycles, address, memory) & A;
+    uint8_t result = ReadByte(address, memory) & A;
 
     Z = (result == 0);
     V = result & 0x40;
     N = (result & 0b1000000) > 0;
 }
 
-void CPU::OpADC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpADC(uint16_t address, Mem& memory)
 {
-    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    uint8_t operand = ReadByte(address, memory);
     const bool sign_bits_match = !(operand & 0b10000000) ^ (A & 0b10000000);
 
     uint16_t sum = A + C + operand;
@@ -653,126 +645,116 @@ void CPU::OpADC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     C = (sum > 0xFF);
 }
 
-void CPU::OpSBC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSBC(uint16_t address, Mem& memory)
 {
     // Subtraction is the same as addition with the negated operand.
     memory[address] = ~memory[address];
-    OpADC(machine_cycles, address, memory);
+    OpADC(address, memory);
 }
 
-void CPU::OpCMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCMP(uint16_t address, Mem& memory)
 {
-    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    uint8_t operand = ReadByte(address, memory);
     C = (A >= operand);
     Z = (A == operand);
     N = ((A - operand) & 0b10000000) > 0;
 }
 
-void CPU::OpCPX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCPX(uint16_t address, Mem& memory)
 {
-    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    uint8_t operand = ReadByte(address, memory);
     C = (X >= operand);
     Z = (X == operand);
     N = ((X - operand) & 0b10000000) > 0;
 }
 
-void CPU::OpCPY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCPY(uint16_t address, Mem& memory)
 {
-    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    uint8_t operand = ReadByte(address, memory);
     C = (Y >= operand);
     Z = (Y == operand);
     N = ((Y - operand) & 0b10000000) > 0;
 }
 
-void CPU::OpINC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpINC(uint16_t address, Mem& memory)
 {
-    uint8_t result = ReadByte(machine_cycles, address, memory);
+    uint8_t result = ReadByte(address, memory);
     result++;
-    machine_cycles--;
-    StoreByte(machine_cycles, address, result, memory);
+    StoreByte(address, result, memory);
     SetFlagsZN(result);
 }
 
-void CPU::OpINX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpINX(uint16_t address, Mem& memory)
 {
     X++;
-    machine_cycles--;
     SetFlagsZN(X);
 }
 
-void CPU::OpINY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpINY(uint16_t address, Mem& memory)
 {
     Y++;
-    machine_cycles--;
+
     SetFlagsZN(Y);
 }
 
-void CPU::OpDEC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpDEC(uint16_t address, Mem& memory)
 {
-    uint8_t result = ReadByte(machine_cycles, address, memory);
+    uint8_t result = ReadByte(address, memory);
     result--;
-    machine_cycles--;
-    StoreByte(machine_cycles, address, result, memory);
+    StoreByte(address, result, memory);
     SetFlagsZN(result);
 }
 
-void CPU::OpDEX(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpDEX(uint16_t address, Mem& memory)
 {
     X--;
-    machine_cycles--;
     SetFlagsZN(X);
 }
 
-void CPU::OpDEY(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpDEY(uint16_t address, Mem& memory)
 {
     Y--;
-    machine_cycles--;
     SetFlagsZN(Y);
 }
 
-void CPU::OpASLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpASLA(uint16_t address, Mem& memory)
 {
     C = (A & 0b10000000) > 0;
     A <<= 1;
-    machine_cycles--;
     SetFlagsZN(A);
 }
 
-void CPU::OpASL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpASL(uint16_t address, Mem& memory)
 {
-    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    uint8_t operand = ReadByte(address, memory);
     C = (operand & 0b10000000) > 0;
 
     operand <<= 1;
-    machine_cycles--;
-    StoreByte(machine_cycles, address, operand, memory);
+    StoreByte(address, operand, memory);
     SetFlagsZN(operand);
 }
 
-void CPU::OpLSRA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLSRA(uint16_t address, Mem& memory)
 {
     C = (A & 0b00000001);
     A >>= 1;
-    machine_cycles--;
     SetFlagsZN(A);
 }
 
-void CPU::OpLSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpLSR(uint16_t address, Mem& memory)
 {
-    uint8_t operand = ReadByte(machine_cycles, address, memory);
+    uint8_t operand = ReadByte(address, memory);
     C = (operand & 0b00000001);
 
     operand >>= 1;
-    machine_cycles--;
-    StoreByte(machine_cycles, address, operand, memory);
+    StoreByte(address, operand, memory);
     SetFlagsZN(operand);
 }
 
-void CPU::OpROLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpROLA(uint16_t address, Mem& memory)
 {
     const uint8_t operand = A;
     A <<= 1;
-    machine_cycles--;
 
     if (C)
         A |= 0b00000001;
@@ -781,25 +763,23 @@ void CPU::OpROLA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(A);
 }
 
-void CPU::OpROL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpROL(uint16_t address, Mem& memory)
 {
-    const uint8_t operand = ReadByte(machine_cycles, address, memory);
+    const uint8_t operand = ReadByte(address, memory);
     uint8_t result = operand << 1;
-    machine_cycles--;
 
     if (C)
         result |= 0b00000001;
 
-    StoreByte(machine_cycles, address, result, memory);
+    StoreByte(address, result, memory);
     C = (operand & 0b10000000) > 0;
     SetFlagsZN(result);
 }
 
-void CPU::OpRORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpRORA(uint16_t address, Mem& memory)
 {
     const uint8_t operand = A;
     A >>= 1;
-    machine_cycles--;
 
     if (C)
         A |= 0b10000000;
@@ -808,143 +788,131 @@ void CPU::OpRORA(uint32_t& machine_cycles, uint16_t address, Mem& memory)
     SetFlagsZN(A);
 }
 
-void CPU::OpROR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpROR(uint16_t address, Mem& memory)
 {
-    const uint8_t operand = ReadByte(machine_cycles, address, memory);
+    const uint8_t operand = ReadByte(address, memory);
     uint8_t result = operand >> 1;
-    machine_cycles--;
 
     if (C)
         result |= 0b10000000;
 
-    StoreByte(machine_cycles, address, result, memory);
+    StoreByte(address, result, memory);
     C = (operand & 0b00000001) > 0;
     SetFlagsZN(result);
 }
 
 // Implements the bug the 6502 has with jumping in the indirect addressing function.
-void CPU::OpJMP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpJMP(uint16_t address, Mem& memory)
 {
     PC = address;
 }
 
-void CPU::OpJSR(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpJSR(uint16_t address, Mem& memory)
 {
-    PushWordToStack(machine_cycles, PC - 1, memory);
+    PushWordToStack(PC - 1, memory);
     PC = address;
-    machine_cycles--;
 }
 
-void CPU::OpRTS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpRTS(uint16_t address, Mem& memory)
 {
-    PC = PullWordFromStack(machine_cycles, memory);
-    machine_cycles -= 2;
+    PC = PullWordFromStack(memory);
 }
 
-void CPU::OpBCC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBCC(uint16_t address, Mem& memory)
 {
-    ConditionalBranch(C, false, machine_cycles, address);
+    ConditionalBranch(C, false, address);
 }
 
-void CPU::OpBCS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBCS(uint16_t address, Mem& memory)
 {
-    ConditionalBranch(C, true, machine_cycles, address);
+    ConditionalBranch(C, true, address);
 }
 
-void CPU::OpBEQ(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBEQ(uint16_t address, Mem& memory)
 {
-    ConditionalBranch(Z, true, machine_cycles, address);
+    ConditionalBranch(Z, true, address);
 }
 
-void CPU::OpBMI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBMI(uint16_t address, Mem& memory)
 {
-    ConditionalBranch(N, true, machine_cycles, address);
+    ConditionalBranch(N, true, address);
 }
 
-void CPU::OpBNE(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBNE(uint16_t address, Mem& memory)
 {
-    ConditionalBranch(Z, false, machine_cycles, address);
+    ConditionalBranch(Z, false, address);
 }
 
-void CPU::OpBPL(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBPL(uint16_t address, Mem& memory)
 {
-    ConditionalBranch(N, false, machine_cycles, address);
+    ConditionalBranch(N, false, address);
 }
 
-void CPU::OpBVC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBVC(uint16_t address, Mem& memory)
 {
-    ConditionalBranch(V, false, machine_cycles, address);
+    ConditionalBranch(V, false, address);
 }
 
-void CPU::OpBVS(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBVS(uint16_t address, Mem& memory)
 {
-    ConditionalBranch(V, true, machine_cycles, address);
+    ConditionalBranch(V, true, address);
 }
 
-void CPU::OpCLC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCLC(uint16_t address, Mem& memory)
 {
     C = false;
-    machine_cycles--;
 }
 
-void CPU::OpCLD(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCLD(uint16_t address, Mem& memory)
 {
     D = false;
-    machine_cycles--;
 }
 
-void CPU::OpCLI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCLI(uint16_t address, Mem& memory)
 {
     I = false;
-    machine_cycles--;
 }
 
-void CPU::OpCLV(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpCLV(uint16_t address, Mem& memory)
 {
     V = false;
-    machine_cycles--;
 }
 
-void CPU::OpSEC(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSEC(uint16_t address, Mem& memory)
 {
     C = true;
-    machine_cycles--;
 }
 
-void CPU::OpSED(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSED(uint16_t address, Mem& memory)
 {
     D = true;
-    machine_cycles--;
 }
 
-void CPU::OpSEI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpSEI(uint16_t address, Mem& memory)
 {
     I = true;
-    machine_cycles--;
 }
 
-void CPU::OpBRK(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpBRK(uint16_t address, Mem& memory)
 {
-    // void CPU::PushWordToStack(uint32_t& machine_cycles, uint16_t value, Mem& memory)
-
-    PushWordToStack(machine_cycles, PC, memory);
-    PushByteToStack(machine_cycles, PS, memory);
-    PC = FetchWord(machine_cycles, memory);
+    PushWordToStack(PC, memory);
+    PushByteToStack(PS, memory);
+    PC = FetchWord(memory);
     B = true;
 }
 
-void CPU::OpNOP(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpNOP(uint16_t address, Mem& memory)
 {
-    machine_cycles--;
+    ;
 }
 
-void CPU::OpRTI(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpRTI(uint16_t address, Mem& memory)
 {
-    PS = PullByteFromStack(machine_cycles, memory);
-    PC = PullWordFromStack(machine_cycles, memory);
+    PS = PullByteFromStack(memory);
+    PC = PullWordFromStack(memory);
 }
 
-void CPU::OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory)
+void CPU::OpIllegal(uint16_t address, Mem& memory)
 {
     std::stringstream stream;
     stream << "Unhandled instruction: 0x" << std::hex << address;
