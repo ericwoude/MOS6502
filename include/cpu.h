@@ -196,6 +196,11 @@ class CPU
     void OpSED(uint32_t& machine_cycles, uint16_t address, Mem& memory);
     void OpSEI(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 
+    // SYSTEM OPERATIONS
+    void OpBRK(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpNOP(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+    void OpRTI(uint32_t& machine_cycles, uint16_t address, Mem& memory);
+
     void OpIllegal(uint32_t& machine_cycles, uint16_t address, Mem& memory);
 };
 
