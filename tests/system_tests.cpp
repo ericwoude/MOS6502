@@ -44,14 +44,13 @@ class SystemTests : public ::testing::Test
 TEST_F(SystemTests, BRK)
 {
     mem[0xFFFC] = 0x00;
-    mem[0xFFFD] = 0x20;
-    mem[0xFFFE] = 0x30;
+    mem[0xFFFE] = 0x20;
+    mem[0xFFFF] = 0x30;
 
     const uint32_t cycles = 7;
     uint32_t used_cycles = cpu.Execute(cycles, mem);
 
     EXPECT_EQ(cpu.PC, 0x3020);
-    EXPECT_TRUE(cpu.B);
     EXPECT_EQ(cycles, used_cycles);
 }
 

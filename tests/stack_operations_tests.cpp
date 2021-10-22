@@ -112,7 +112,23 @@ TEST_F(StackOperationTests, PHA)
 
 TEST_F(StackOperationTests, PHP)
 {
-    TestPushOnStack(0x08, cpu.PS);
+    // TestPushOnStack(0x08, cpu.PS);
+    cpu.SP = 0xF0;
+    cpu.PS = 0x00;
+
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x08;
+
+    const uint32_t cycles = 3;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    // Check if the register content is pushed on the
+    // stack and if the stack pointer is decremented.
+    // The PHP operation sets the 5th and 4th bit
+    // before pushing the processor status.
+    EXPECT_EQ(mem[0x100 + cpu.SP + 1], cpu.PS | 0b00110000);
+    EXPECT_EQ(cycles, used_cycles);
+    EXPECT_EQ(cpu.SP, 0xF0 - 1);
 }
 
 TEST_F(StackOperationTests, PLA)
@@ -126,15 +142,18 @@ TEST_F(StackOperationTests, PLA)
 
 TEST_F(StackOperationTests, PLP)
 {
-    // Will pull 0b11111111 from stack into PS
-    TestPullFromStack(0x28, cpu.PS);
+    cpu.SP = 0xFE;
 
-    // Test all flags are set accordingly.
-    EXPECT_TRUE(cpu.C);
-    EXPECT_TRUE(cpu.Z);
-    EXPECT_TRUE(cpu.I);
-    EXPECT_TRUE(cpu.D);
-    EXPECT_TRUE(cpu.B);
-    EXPECT_TRUE(cpu.V);
-    EXPECT_TRUE(cpu.N);
+    // INLINE PROGRAM
+    mem[0xFFFC] = 0x28;
+    mem[0x01FF] = 0b11001111;
+
+    const uint32_t cycles = 4;
+    uint32_t used_cycles = cpu.Execute(cycles, mem);
+
+    // Check if the value is pulled from stack into
+    // the register and if the stack pointer is incremented.
+    EXPECT_EQ(cpu.PS, 0b11001111);
+    EXPECT_EQ(cpu.SP, 0xFF);
+    EXPECT_EQ(cycles, used_cycles);
 }

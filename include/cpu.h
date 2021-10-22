@@ -142,6 +142,7 @@ class CPU
     void OpTSX(uint16_t address, Mem& memory);
     void OpTXS(uint16_t address, Mem& memory);
     void OpPHA(uint16_t address, Mem& memory);
+    // The PHP operation sets the 5th and 4th bit before pushing the processor status on the stack.
     void OpPHP(uint16_t address, Mem& memory);
     void OpPLA(uint16_t address, Mem& memory);
     void OpPLP(uint16_t address, Mem& memory);
@@ -203,6 +204,7 @@ class CPU
     void OpSEI(uint16_t address, Mem& memory);
 
     // SYSTEM OPERATIONS
+    // The BRK operation sets the 5th and 4th bit before pushing the processor status on the stack.
     void OpBRK(uint16_t address, Mem& memory);
     void OpNOP(uint16_t address, Mem& memory);
     void OpRTI(uint16_t address, Mem& memory);

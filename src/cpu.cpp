@@ -315,8 +315,10 @@ uint8_t CPU::PullByteFromStack(Mem& memory)
 
 uint16_t CPU::PullWordFromStack(Mem& memory)
 {
-    SP++;
-    return ReadWord(0x100 + SP, memory);
+    uint8_t lo = PullByteFromStack(memory);
+    uint8_t hi = PullByteFromStack(memory);
+
+    return lo | (hi << 8);
 }
 
 // Instruction specific functions
@@ -586,7 +588,7 @@ void CPU::OpPHA(uint16_t address, Mem& memory)
 
 void CPU::OpPHP(uint16_t address, Mem& memory)
 {
-    PushByteToStack(PS, memory);
+    PushByteToStack(PS | 0b00110000, memory);
 }
 
 void CPU::OpPLA(uint16_t address, Mem& memory)
@@ -598,6 +600,8 @@ void CPU::OpPLA(uint16_t address, Mem& memory)
 void CPU::OpPLP(uint16_t address, Mem& memory)
 {
     PS = PullByteFromStack(memory);
+    B = false;
+    _ = false;  // unused bit
 }
 
 void CPU::OpAND(uint16_t address, Mem& memory)
@@ -620,29 +624,25 @@ void CPU::OpORA(uint16_t address, Mem& memory)
 
 void CPU::OpBIT(uint16_t address, Mem& memory)
 {
-    uint8_t result = ReadByte(address, memory) & A;
-
-    Z = (result == 0);
-    V = result & 0x40;
-    N = (result & 0b1000000) > 0;
+    uint8_t operand = ReadByte(address, memory);
+    Z = !(operand & A);
+    V = operand & 0b01000000 > 0;
+    N = (operand & 0b10000000) > 0;
 }
 
 void CPU::OpADC(uint16_t address, Mem& memory)
 {
+    assert(D == false);  // decimal mode not implemented.
+
     uint8_t operand = ReadByte(address, memory);
-    const bool sign_bits_match = !(operand & 0b10000000) ^ (A & 0b10000000);
-
     uint16_t sum = A + C + operand;
-    A = (sum & 0xFF);
 
-    // The addition overflowed if the sign bit of the
-    // operand and the pre-addition accumulator matched and...
-    // if the sign bit of the pre-op accumulator and
-    // the result differ.
-    V = sign_bits_match && ((A ^ operand) & 0b10000000);
-    Z = (A == 0);
-    N = (A & 0b10000000) > 0;
-    C = (sum > 0xFF);
+    C = sum > 0xFF;
+    V = ~(A ^ operand) & (A ^ sum) & 0b10000000;
+    Z = A == 0;
+    SetFlagsZN(A);
+
+    A = (uint8_t)sum;
 }
 
 void CPU::OpSBC(uint16_t address, Mem& memory)
@@ -655,24 +655,29 @@ void CPU::OpSBC(uint16_t address, Mem& memory)
 void CPU::OpCMP(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
-    C = (A >= operand);
-    Z = (A == operand);
+    Z = A == operand;
+    C = A >= operand;
     N = ((A - operand) & 0b10000000) > 0;
+
+    // uint8_t operand = ReadByte(address, memory);
+    // C = (A >= operand);
+    // Z = (A == operand);
+    // N = ((A - operand) & 0b10000000) > 0;
 }
 
 void CPU::OpCPX(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
-    C = (X >= operand);
-    Z = (X == operand);
+    Z = X == operand;
+    C = X >= operand;
     N = ((X - operand) & 0b10000000) > 0;
 }
 
 void CPU::OpCPY(uint16_t address, Mem& memory)
 {
     uint8_t operand = ReadByte(address, memory);
-    C = (Y >= operand);
     Z = (Y == operand);
+    C = (Y >= operand);
     N = ((Y - operand) & 0b10000000) > 0;
 }
 
@@ -815,7 +820,7 @@ void CPU::OpJSR(uint16_t address, Mem& memory)
 
 void CPU::OpRTS(uint16_t address, Mem& memory)
 {
-    PC = PullWordFromStack(memory);
+    PC = 1 + PullWordFromStack(memory);
 }
 
 void CPU::OpBCC(uint16_t address, Mem& memory)
@@ -895,10 +900,11 @@ void CPU::OpSEI(uint16_t address, Mem& memory)
 
 void CPU::OpBRK(uint16_t address, Mem& memory)
 {
-    PushWordToStack(PC, memory);
-    PushByteToStack(PS, memory);
-    PC = FetchWord(memory);
+    PushWordToStack(PC + 1, memory);
+    PushByteToStack(PS | 0b00110000, memory);
+    PC = ReadWord(0xFFFE, memory);
     B = true;
+    I = true;
 }
 
 void CPU::OpNOP(uint16_t address, Mem& memory)
@@ -909,12 +915,14 @@ void CPU::OpNOP(uint16_t address, Mem& memory)
 void CPU::OpRTI(uint16_t address, Mem& memory)
 {
     PS = PullByteFromStack(memory);
+    PS &= ~0b00110000;
     PC = PullWordFromStack(memory);
 }
 
 void CPU::OpIllegal(uint16_t address, Mem& memory)
 {
     std::stringstream stream;
+    stream << "Previous PC: " << std::hex << PC << "\n";
     stream << "Unhandled instruction: 0x" << std::hex << address;
     throw std::invalid_argument(stream.str());
 }
